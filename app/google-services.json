@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "533333692169",
+    "firebase_url": "https://watchtogether-b73ab-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "watchtogether-b73ab",
+    "storage_bucket": "watchtogether-b73ab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:533333692169:android:3812139d0aa9e06fe48dd8",
+        "android_client_info": {
+          "package_name": "com.example.watch_together"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "533333692169-q6e6phaa3k9rpg3krd42hudbg6vc8mfa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCb_8C6DhP0rzB4C9-ir3Ni87ZUGW-7-6E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "533333692169-q6e6phaa3k9rpg3krd42hudbg6vc8mfa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
