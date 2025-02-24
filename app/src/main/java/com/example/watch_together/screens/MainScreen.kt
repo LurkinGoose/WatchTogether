@@ -1,80 +1,67 @@
 package com.example.watch_together.screens
 
 import android.util.Log
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
 import com.example.watch_together.models.Screen
-import com.example.watch_together.tabHost.BottomNavigationBar
-import com.example.watch_together.tabHost.FavoritesTabNavHost
-import com.example.watch_together.tabHost.SearchTabNavHost
 import com.example.watch_together.viewModels.AuthViewModel
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     movieViewModel: MovieViewModel,
+    favoritesViewModel: FavoritesViewModel,
     authViewModel: AuthViewModel,
-    favoritesViewModel: FavoritesViewModel
+    paddingValues: PaddingValues
 ) {
-    var selectedTab by rememberSaveable { mutableStateOf(Screen.Search) }
-    var savedMovieId by rememberSaveable { mutableStateOf<Int?>(null) }
-    Log.d("AppLog", "MainScreen запустился")
-
-
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                selectedScreen = selectedTab,
-                onScreenSelected = { screen -> selectedTab = screen },
-                favoritesViewModel = favoritesViewModel
+    Log.d("MainScreen", "MainScreen recomposed")
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "search"
+    ) {
+        composable(Screen.Search.route) {
+            SearchScreen(
+                movieViewModel = movieViewModel,
+                favoritesViewModel = favoritesViewModel,
+                onMovieSelected = { movieId ->
+                    navController.navigate("movie_demo/$movieId")
+                },
+                paddingValues = paddingValues
             )
         }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            AnimatedContent(
-                targetState = selectedTab,
-                label = "MainScreen_AnimatedContent"
-            ) { currentScreen ->
-                when (currentScreen) {
-                    Screen.Search -> key("search") {
-                        SearchTabNavHost(
-                            movieViewModel = movieViewModel,
-                            favoritesViewModel = favoritesViewModel,
-                            paddingValues = paddingValues
-                        )
-                    }
-                    Screen.Favorites -> key("favorites") {
-                        FavoritesTabNavHost(
-                            movieViewModel = movieViewModel,
-                            favoritesViewModel = favoritesViewModel,
-                            paddingValues = paddingValues,
-                            savedMovieId = savedMovieId,
-                            onMovieIdSaved = { savedMovieId = it }
-                        )
-                    }
-                    Screen.Settings -> key("settings") {
-                        SettingsScreen(
-                            movieViewModel = movieViewModel,
-                            authViewModel = authViewModel,
-                            paddingValues = paddingValues
-                        )
-                    }
-                }
+        composable(Screen.Favorites.route) {
+            FavoritesScreen(
+                movieViewModel = movieViewModel,
+                favoritesViewModel = favoritesViewModel,
+                onMovieSelected = { movieId ->
+                    navController.navigate("movie_demo/$movieId")
+                },
+                paddingValues = paddingValues
+            )
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                authViewModel = authViewModel,
+                movieViewModel = movieViewModel,
+                paddingValues = paddingValues
+            )
+        }
+        composable(Screen.MovieDemo.route) { backStackEntry ->
+            val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+            movieId?.let {
+                DemoScreen(
+                    movieId = it,
+                    movieViewModel = movieViewModel,
+                    onDismiss = {
+                        navController.popBackStack()
+                    },
+                    paddingValues = paddingValues
+                )
             }
         }
     }
