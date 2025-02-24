@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.example.watch_together.models.Movie
 import com.example.watch_together.viewModels.MovieViewModel
 
 
@@ -37,67 +37,72 @@ fun DemoScreen(
     onDismiss: () -> Unit,
     paddingValues: PaddingValues
 ) {
-    val movieDetails by movieViewModel.movieDetails.collectAsState()
-    Log.d("AppLog", "DemoScreen запустился")
+    val uiState by movieViewModel.uiState.collectAsState()
+    Log.d("AppLog", "DemoScreen запустился с movieId: $movieId")
 
     LaunchedEffect(movieId) {
         movieViewModel.getMovieDetails(movieId)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        ScreenState(viewModel = movieViewModel)
-
-        movieDetails?.let {
-            MovieContent(it, onDismiss, paddingValues)
-        }
-    }
-}
-
-@Composable
-fun MovieContent(movieDetails: Movie, onDismiss: () -> Unit, paddingValues: PaddingValues) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = paddingValues
     ) {
         item {
-            Box {
-                AsyncImage(
-                    model = movieDetails.fullPosterPath,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(600.dp),
-                    contentScale = ContentScale.Crop
-                )
+            if (uiState.loading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            } else if (!uiState.errorMessage.isNullOrEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = uiState.errorMessage!!,
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 18.sp
+                    )
+                }
+            } else {
+                uiState.movieDetails?.let { movie ->
+                    Box {
+                        AsyncImage(
+                            model = movie.fullPosterPath,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(600.dp),
+                            contentScale = ContentScale.Crop
+                        )
 
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Назад",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Назад",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = movie.title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = movie.overview,
+                        fontSize = 16.sp
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = movieDetails.title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = movieDetails.overview,
-                fontSize = 16.sp
-            )
         }
     }
 }

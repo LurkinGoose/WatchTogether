@@ -7,12 +7,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
-import com.example.watch_together.viewModels.BaseViewModel
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
 
@@ -22,9 +21,8 @@ fun FavoritesScreen(
     favoritesViewModel: FavoritesViewModel,
     onMovieSelected: (Int) -> Unit,
     paddingValues: PaddingValues
-){
-    val favoriteMovies by favoritesViewModel.favoriteMovies.collectAsState()
-    val listState = movieViewModel.saveListState
+) {
+    val uiState by favoritesViewModel.uiState.collectAsState() // ✅ Теперь используем uiState
     Log.d("AppLog", "FavoriteScreen запустился")
 
     LaunchedEffect(Unit) {
@@ -43,7 +41,9 @@ fun FavoritesScreen(
             modifier = Modifier.padding(16.dp)
         )
 
-        if (favoriteMovies.isEmpty()) {
+        if (uiState.loading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally)) // ✅ Показываем индикатор загрузки
+        } else if (uiState.favoriteMovies.isEmpty()) {
             Text(
                 text = "Список избранных фильмов пуст",
                 modifier = Modifier.padding(16.dp),
@@ -51,23 +51,31 @@ fun FavoritesScreen(
             )
         } else {
             LazyColumn(
-                state = listState,
+                state = movieViewModel.saveListState,
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.LightGray)
             ) {
-                itemsIndexed(favoriteMovies) { index, movie ->
+                itemsIndexed(uiState.favoriteMovies) { index, movie -> // ✅ Теперь берём из uiState
                     MovieListItem(movie, favoritesViewModel) {
                         onMovieSelected(movie.id)
                     }
                     Spacer(
                         modifier = Modifier.height(
-                            if (index == favoriteMovies.lastIndex) paddingValues.calculateBottomPadding()
+                            if (index == uiState.favoriteMovies.lastIndex) paddingValues.calculateBottomPadding()
                             else 1.dp
                         )
                     )
                 }
             }
+        }
+
+        uiState.errorMessage?.let { error ->
+            Text(
+                text = error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
         }
     }
 }

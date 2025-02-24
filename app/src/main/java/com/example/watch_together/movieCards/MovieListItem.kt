@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -27,53 +26,45 @@ import com.example.watch_together.viewModels.FavoritesViewModel
 fun MovieListItem(moviesList: Movie, favoritesViewModel: FavoritesViewModel, onClick: () -> Unit) {
     var imageState by remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
 
-    val favoriteMovies by favoritesViewModel.favoriteMovies.collectAsState()
-    val isFavorite = favoriteMovies.any { it.id == moviesList.id }
+    val uiState by favoritesViewModel.uiState.collectAsState() // ✅ Подписываемся на uiState
+    val isFavorite = uiState.favoriteMovies.any { it.id == moviesList.id } // ✅ Используем uiState
 
-    Row (modifier = Modifier
-        .fillMaxWidth(1f)
-        .background(color = Color.White)
-        .padding(start = 8.dp),
-
-
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+            .padding(start = 8.dp)
     ) {
-        Box(modifier = Modifier
-            .fillMaxHeight(1f)
-            .width(130.dp)
-            .height(227.dp)
-            .background(color = Color.Transparent)
-            .padding(top = 16.dp, bottom = 16.dp)
-
-
-
+        Box(
+            modifier = Modifier
+                .width(130.dp)
+                .height(227.dp)
+                .background(color = Color.Transparent)
+                .padding(top = 16.dp, bottom = 16.dp)
         ) {
             AsyncImage(
                 model = moviesList.fullPosterPath,
                 contentDescription = moviesList.title,
-                modifier = Modifier
-                    .align(Center)
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Fit,
-                onState = { state ->
-                    imageState = state
-                }
+                onState = { state -> imageState = state }
             )
-            when (val state = imageState) {
+            when (imageState) {
                 is AsyncImagePainter.State.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is AsyncImagePainter.State.Error -> {
-                    Icon(imageVector = Icons.Filled.Refresh, contentDescription = "Перезагрузить постер")
+                    Icon(
+                        imageVector = Icons.Filled.Refresh,
+                        contentDescription = "Перезагрузить постер",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
-                else -> {
-
-                }
+                else -> Unit
             }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
-
-
 
         Row(
             modifier = Modifier
@@ -86,7 +77,9 @@ fun MovieListItem(moviesList: Movie, favoritesViewModel: FavoritesViewModel, onC
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,
                 lineHeight = 18.sp,
-                modifier = Modifier.weight(1f).padding(top = 16.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(top = 16.dp)
             )
 
             IconButton(
@@ -96,8 +89,8 @@ fun MovieListItem(moviesList: Movie, favoritesViewModel: FavoritesViewModel, onC
                     } else {
                         favoritesViewModel.addToFavorites(moviesList.id)
                     }
-                }, modifier = Modifier.size(56.dp)
-
+                },
+                modifier = Modifier.size(56.dp)
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -107,14 +100,5 @@ fun MovieListItem(moviesList: Movie, favoritesViewModel: FavoritesViewModel, onC
                 )
             }
         }
-
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun MovieItemPreview() {
-//    Watch_TogetherTheme {
-//        MovieItem(movie = Movie("Inception", "https://image.tmdb.org/t/p/w500/zo8CIjJ2nfNOevqNajwMRO6Hwka.jpg"))
-//    }
-//}

@@ -1,5 +1,6 @@
 package com.example.watch_together.tabHost
 
+import android.util.Log
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -20,29 +21,41 @@ fun BottomNavigationBar(
     onScreenSelected: (Screen) -> Unit,
     favoritesViewModel: FavoritesViewModel
 ) {
+    Log.d("BottomNavigationBar", "🔄 Компонент BottomNavigationBar пересоздался. Текущий экран: ${selectedScreen.route}")
 
-    val hasViewedFavorites by favoritesViewModel.hasViewedFavorites.collectAsState()
+    val uiState by favoritesViewModel.uiState.collectAsState()
+    val hasViewedFavorites = uiState.hasViewedFavorites
+
+    Log.d("BottomNavigationBar", "💾 hasViewedFavorites = $hasViewedFavorites")
 
     NavigationBar(containerColor = Color.White.copy(0.8f), tonalElevation = 0.dp, contentColor = Color.White) {
+
         NavigationBarItem(
             selected = selectedScreen == Screen.Search,
-            onClick = { onScreenSelected(Screen.Search) },
+            onClick = {
+                Log.d("BottomNavigationBar", "🟢 Нажата вкладка Поиск. Текущий экран: ${selectedScreen.route}")
+                if (selectedScreen != Screen.Search) {
+                    Log.d("BottomNavigationBar", "✅ Переход на экран Search")
+                    onScreenSelected(Screen.Search)
+                } else {
+                    Log.d("BottomNavigationBar", "❌ Уже на экране Search. Переход не требуется.")
+                }
+            },
             icon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
-            label = { Text("Поиск") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.DarkGray,
-                unselectedIconColor = Color.Gray,
-                selectedTextColor = Color.DarkGray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color.White
-            )
+            label = { Text("Поиск") }
         )
+
         NavigationBarItem(
             selected = selectedScreen == Screen.Favorites,
             onClick = {
-                onScreenSelected(Screen.Favorites)
-                favoritesViewModel.markFavoritesAsViewed()
-                favoritesViewModel.checkHasViewedFavorites()
+                Log.d("BottomNavigationBar", "🟢 Нажата вкладка Избранное. Текущий экран: ${selectedScreen.route}")
+                if (selectedScreen != Screen.Favorites) {
+                    Log.d("BottomNavigationBar", "✅ Переход на экран Favorites")
+                    onScreenSelected(Screen.Favorites)
+                    favoritesViewModel.markFavoritesAsViewed()
+                } else {
+                    Log.d("BottomNavigationBar", "❌ Уже на экране Favorites. Переход не требуется.")
+                }
             },
             icon = {
                 BadgedBox(badge = {
@@ -56,28 +69,22 @@ fun BottomNavigationBar(
                     Icon(Icons.Default.Favorite, contentDescription = "Избранное")
                 }
             },
-            label = { Text("Избранное") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.DarkGray,
-                unselectedIconColor = Color.Gray,
-                selectedTextColor = Color.DarkGray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color.White
-            )
+            label = { Text("Избранное") }
         )
+
         NavigationBarItem(
             selected = selectedScreen == Screen.Settings,
-            onClick = { onScreenSelected(Screen.Settings) },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки" )},
-            label = { Text("Настройки") },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Color.DarkGray,
-                unselectedIconColor = Color.Gray,
-                selectedTextColor = Color.DarkGray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color.White
-            )
+            onClick = {
+                Log.d("BottomNavigationBar", "🟢 Нажата вкладка Настройки. Текущий экран: ${selectedScreen.route}")
+                if (selectedScreen != Screen.Settings) {
+                    Log.d("BottomNavigationBar", "✅ Переход на экран Settings")
+                    onScreenSelected(Screen.Settings)
+                } else {
+                    Log.d("BottomNavigationBar", "❌ Уже на экране Settings. Переход не требуется.")
+                }
+            },
+            icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
+            label = { Text("Настройки") }
         )
     }
-
 }

@@ -1,6 +1,7 @@
 package com.example.watch_together.viewModels
 
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.watch_together.models.Movie
 import com.example.watch_together.repository.MovieRepository
@@ -8,25 +9,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MovieViewModel(private val repository: MovieRepository) : BaseViewModel() {
+class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
 
-    private val _movieList = MutableStateFlow<List<Movie>>(emptyList())
-    val movieList: StateFlow<List<Movie>> = _movieList
+    private val _uiState = MutableStateFlow(MovieUiState())
+    val uiState: StateFlow<MovieUiState> = _uiState
 
     val saveListState = LazyListState()
 
     fun searchMovies(query: String) {
-        setLoading(true)
-        setError(null)
-
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true)
             try {
                 val movies = repository.searchMovies(query)
-                _movieList.value = movies
+                _uiState.value = _uiState.value.copy(movies = movies, loading = false)
             } catch (e: Exception) {
-                setError("Ошибка загрузки: ${e.localizedMessage}")
-            } finally {
-                setLoading(false)
+                _uiState.value = _uiState.value.copy(errorMessage = e.localizedMessage, loading = false)
             }
         }
     }
@@ -35,25 +32,25 @@ class MovieViewModel(private val repository: MovieRepository) : BaseViewModel() 
     val movieDetails: StateFlow<Movie?> = _movieDetails
 
     fun getMovieDetails(movieId: Int) {
-        setLoading(true)
-        setError(null)
-
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
             try {
                 val movie = repository.getMovieDetails(movieId)
                 _movieDetails.value = movie
             } catch (e: Exception) {
-                setError("Ошибка загрузки фильма: ${e.localizedMessage}")
+                _uiState.value = _uiState.value.copy(errorMessage = "Ошибка загрузки фильма: ${e.localizedMessage}")
             } finally {
-                setLoading(false)
+                _uiState.value = _uiState.value.copy(loading = false)
             }
         }
     }
 
+    // Очистка списка фильмов
     fun clearMovies() {
-        _movieList.value = emptyList()
+        _uiState.value = _uiState.value.copy(movies = emptyList())
     }
 
+    // Очистка деталей фильма
     fun clearMovieDetails() {
         _movieDetails.value = null
     }

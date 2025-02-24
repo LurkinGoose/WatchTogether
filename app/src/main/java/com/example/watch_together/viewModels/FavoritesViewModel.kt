@@ -1,5 +1,6 @@
 package com.example.watch_together.viewModels
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.watch_together.models.Movie
 import com.example.watch_together.repository.MovieRepository
@@ -7,13 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class FavoritesViewModel(private val repository: MovieRepository) : BaseViewModel() {
+class FavoritesViewModel(private val repository: MovieRepository) : ViewModel() {
 
-    private val _favoriteMovies = MutableStateFlow<List<Movie>>(emptyList())
-    val favoriteMovies: StateFlow<List<Movie>> = _favoriteMovies
-
-    private val _hasViewedFavorites = MutableStateFlow(false)
-    val hasViewedFavorites: StateFlow<Boolean> = _hasViewedFavorites
+    private val _uiState = MutableStateFlow(FavoritesUiState())
+    val uiState: StateFlow<FavoritesUiState> = _uiState
 
     init {
         checkHasViewedFavorites()
@@ -22,27 +20,24 @@ class FavoritesViewModel(private val repository: MovieRepository) : BaseViewMode
     fun checkHasViewedFavorites() {
         val hasViewed = repository.getHasViewedFavorites()
         println("checkHasViewedFavorites: $hasViewed")
-        _hasViewedFavorites.value = hasViewed
+        _uiState.value = _uiState.value.copy(hasViewedFavorites = hasViewed)
     }
 
     fun markFavoritesAsViewed() {
         repository.setHasViewedFavorites(true)
-        _hasViewedFavorites.value = true
+        _uiState.value = _uiState.value.copy(hasViewedFavorites = true)
         println("markFavoritesAsViewed: true")
     }
 
-
     fun loadFavorites() {
-        setLoading(true)
-        setError(null)
+        _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
 
         viewModelScope.launch {
             try {
-                _favoriteMovies.value = repository.getFavoriteMovies()
+                val favorites = repository.getFavoriteMovies()
+                _uiState.value = _uiState.value.copy(favoriteMovies = favorites, loading = false)
             } catch (e: Exception) {
-                setError("Ошибка загрузки избранного: ${e.localizedMessage}")
-            } finally {
-                setLoading(false)
+                _uiState.value = _uiState.value.copy(errorMessage = "Ошибка загрузки избранного: ${e.localizedMessage}", loading = false)
             }
         }
     }
