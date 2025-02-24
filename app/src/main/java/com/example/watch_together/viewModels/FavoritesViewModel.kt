@@ -16,11 +16,10 @@ class FavoritesViewModel(private val repository: MovieRepository) : BaseViewMode
     val hasViewedFavorites: StateFlow<Boolean> = _hasViewedFavorites
 
     init {
-        loadFavorites()
         checkHasViewedFavorites()
     }
 
-    private fun checkHasViewedFavorites() {
+    fun checkHasViewedFavorites() {
         _hasViewedFavorites.value = repository.getHasViewedFavorites()
     }
 

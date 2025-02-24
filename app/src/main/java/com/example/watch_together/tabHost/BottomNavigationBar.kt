@@ -42,6 +42,7 @@ fun BottomNavigationBar(
             onClick = {
                 onScreenSelected(Screen.Favorites)
                 favoritesViewModel.markFavoritesAsViewed()
+                favoritesViewModel.checkHasViewedFavorites()
             },
             icon = {
                 BadgedBox(badge = {
