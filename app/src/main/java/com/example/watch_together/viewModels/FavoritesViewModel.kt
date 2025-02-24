@@ -20,13 +20,17 @@ class FavoritesViewModel(private val repository: MovieRepository) : BaseViewMode
     }
 
     fun checkHasViewedFavorites() {
-        _hasViewedFavorites.value = repository.getHasViewedFavorites()
+        val hasViewed = repository.getHasViewedFavorites()
+        println("checkHasViewedFavorites: $hasViewed")
+        _hasViewedFavorites.value = hasViewed
     }
 
     fun markFavoritesAsViewed() {
         repository.setHasViewedFavorites(true)
         _hasViewedFavorites.value = true
+        println("markFavoritesAsViewed: true")
     }
+
 
     fun loadFavorites() {
         setLoading(true)

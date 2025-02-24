@@ -1,5 +1,6 @@
 package com.example.watch_together.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -37,6 +38,7 @@ fun DemoScreen(
     paddingValues: PaddingValues
 ) {
     val movieDetails by movieViewModel.movieDetails.collectAsState()
+    Log.d("AppLog", "DemoScreen запустился")
 
     LaunchedEffect(movieId) {
         movieViewModel.getMovieDetails(movieId)

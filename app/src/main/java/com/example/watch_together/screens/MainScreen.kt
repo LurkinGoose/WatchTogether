@@ -1,5 +1,6 @@
 package com.example.watch_together.screens
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,9 @@ fun MainScreen(
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(Screen.Search) }
     var savedMovieId by rememberSaveable { mutableStateOf<Int?>(null) }
+    Log.d("AppLog", "MainScreen запустился")
+
+
 
     Scaffold(
         bottomBar = {

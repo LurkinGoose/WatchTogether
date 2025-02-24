@@ -1,5 +1,6 @@
 package com.example.watch_together.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +33,8 @@ fun SearchScreen(
     val movies by movieViewModel.movieList.collectAsState()
     val loading by movieViewModel.loading.collectAsState()
     val errorMessage by movieViewModel.errorMessage.collectAsState()
+
+    Log.d("AppLog", "SearchScreen запустился")
 
     val listState = movieViewModel.saveListState
 

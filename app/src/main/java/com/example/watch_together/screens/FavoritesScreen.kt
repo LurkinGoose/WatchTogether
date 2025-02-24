@@ -1,5 +1,6 @@
 package com.example.watch_together.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ fun FavoritesScreen(
 ){
     val favoriteMovies by favoritesViewModel.favoriteMovies.collectAsState()
     val listState = movieViewModel.saveListState
+    Log.d("AppLog", "FavoriteScreen запустился")
 
     LaunchedEffect(Unit) {
         favoritesViewModel.loadFavorites()
