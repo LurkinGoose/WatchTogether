@@ -1,53 +1,60 @@
 package com.example.watch_together.viewModels
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.watch_together.models.FavoriteMovieRepository
 import com.example.watch_together.models.Movie
+import com.example.watch_together.repository.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
-class FavoritesViewModel(private val repository: FavoriteMovieRepository) : ViewModel() {
+class FavoritesViewModel(private val repository: MovieRepository) : BaseViewModel() {
 
     private val _favoriteMovies = MutableStateFlow<List<Movie>>(emptyList())
-    val favoriteMovies: StateFlow<List<Movie>> = _favoriteMovies.asStateFlow()
+    val favoriteMovies: StateFlow<List<Movie>> = _favoriteMovies
 
-    private val _hasViewedFavorites = MutableStateFlow(repository.getHasViewedFavorites())
+    private val _hasViewedFavorites = MutableStateFlow(false)
     val hasViewedFavorites: StateFlow<Boolean> = _hasViewedFavorites
 
     init {
-        loadFavoriteMovies()
+        loadFavorites()
+        checkHasViewedFavorites()
     }
-    fun loadFavoriteMovies() {
+
+    private fun checkHasViewedFavorites() {
+        _hasViewedFavorites.value = repository.getHasViewedFavorites()
+    }
+
+    fun markFavoritesAsViewed() {
+        repository.setHasViewedFavorites(true)
+        _hasViewedFavorites.value = true
+    }
+
+    fun loadFavorites() {
+        setLoading(true)
+        setError(null)
+
         viewModelScope.launch {
-            val movies = repository.getFavoriteMovies()
-            Log.d("FavoritesViewModel", "Loaded favorite movies: ${movies.size}")
-            _favoriteMovies.value = movies
+            try {
+                _favoriteMovies.value = repository.getFavoriteMovies()
+            } catch (e: Exception) {
+                setError("Ошибка загрузки избранного: ${e.localizedMessage}")
+            } finally {
+                setLoading(false)
+            }
         }
     }
+
     fun addToFavorites(movieId: Int) {
         viewModelScope.launch {
             repository.addFavorite(movieId)
-            _hasViewedFavorites.value = false // Сбрасываем состояние
-            repository.setHasViewedFavorites(false) // Сохраняем в SharedPreferences
-            loadFavoriteMovies()
+            loadFavorites()
         }
     }
+
     fun removeFromFavorites(movieId: Int) {
         viewModelScope.launch {
             repository.removeFavorite(movieId)
-            loadFavoriteMovies()
+            loadFavorites()
         }
     }
-    fun markFavoritesAsViewed() {
-        Log.d("FavoritesViewModel", "Marking favorites as viewed")
-        _hasViewedFavorites.value = true
-        repository.setHasViewedFavorites(true)
-        Log.d("FavoritesViewModel", "'hasViewedFavorites' marked as true")
-    }
 }
-

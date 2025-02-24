@@ -14,8 +14,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.watch_together.models.FavoriteMovieRepository
 import com.example.watch_together.movieApiService.RetrofitInstance
+import com.example.watch_together.repository.MovieRepository
 import com.example.watch_together.screens.AuthScreen
 import com.example.watch_together.screens.MainScreen
 import com.example.watch_together.viewModels.AuthViewModel
@@ -25,19 +25,19 @@ import com.example.watch_together.viewModels.AuthState
 import com.example.watch_together.viewModels.SplashViewModel
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.FavoritesViewModelFactory
+import com.example.watch_together.viewModels.MovieViewModelFactory
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 
 class MainActivity : ComponentActivity() {
-    private val movieViewModel: MovieViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels()
-    private val splashViewModel: SplashViewModel by viewModels()
 
+    private val splashViewModel: SplashViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels()
+    private val movieApiService by lazy { RetrofitInstance.api }
+    private val movieViewModel: MovieViewModel by viewModels { MovieViewModelFactory(movieRepository) }
     private val database by lazy { AppDatabase.getDatabase(this) }
     private val favoriteMovieDao by lazy { database.favoriteMovieDao() }
-    private val movieApiService by lazy { RetrofitInstance.api }
-
-    private val repository by lazy { FavoriteMovieRepository(movieApiService, favoriteMovieDao, applicationContext) }
-    private val viewModelFactory by lazy { FavoritesViewModelFactory(repository) }
+    private val movieRepository by lazy { MovieRepository(movieApiService, favoriteMovieDao, applicationContext) }
+    private val viewModelFactory by lazy { FavoritesViewModelFactory(movieRepository) }
     private val favoritesViewModel: FavoritesViewModel by viewModels { viewModelFactory }
 
     private val googleSignInLauncher =

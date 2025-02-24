@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
+import com.example.watch_together.viewModels.BaseViewModel
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
 
@@ -25,7 +26,7 @@ fun FavoritesScreen(
     val listState = movieViewModel.saveListState
 
     LaunchedEffect(Unit) {
-        favoritesViewModel.loadFavoriteMovies()
+        favoritesViewModel.loadFavorites()
     }
 
     Column(
