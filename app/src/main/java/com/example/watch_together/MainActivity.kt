@@ -4,26 +4,41 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.watch_together.models.FavoriteMovieRepository
+import com.example.watch_together.movieApiService.RetrofitInstance
+import com.example.watch_together.screens.AuthScreen
+import com.example.watch_together.screens.MainScreen
+import com.example.watch_together.viewModels.AuthViewModel
+import com.example.watch_together.viewModels.MovieViewModel
 import com.example.watch_together.ui.theme.Watch_TogetherTheme
+import com.example.watch_together.viewModels.AuthState
+import com.example.watch_together.viewModels.SplashViewModel
+import com.example.watch_together.viewModels.FavoritesViewModel
+import com.example.watch_together.viewModels.FavoritesViewModelFactory
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-
 
 class MainActivity : ComponentActivity() {
     private val movieViewModel: MovieViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
+    private val splashViewModel: SplashViewModel by viewModels()
+
+    private val database by lazy { AppDatabase.getDatabase(this) }
+    private val favoriteMovieDao by lazy { database.favoriteMovieDao() }
+    private val movieApiService by lazy { RetrofitInstance.api }
+
+    private val repository by lazy { FavoriteMovieRepository(movieApiService, favoriteMovieDao, applicationContext) }
+    private val viewModelFactory by lazy { FavoritesViewModelFactory(repository) }
+    private val favoritesViewModel: FavoritesViewModel by viewModels { viewModelFactory }
 
     private val googleSignInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
@@ -43,76 +58,63 @@ class MainActivity : ComponentActivity() {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.Theme_Watch_Together)
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge()
+
+        val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition { splashViewModel.isLoading.value }
 
         setContent {
             Watch_TogetherTheme {
-                var isAuthenticated by remember { mutableStateOf(false) }
+                val navController = rememberNavController()
+                val authState by authViewModel.authState.collectAsState()
+                val isLoading by splashViewModel.isLoading.collectAsState()
+                var startDestination by rememberSaveable { mutableStateOf("splash") }
 
-                LaunchedEffect(authViewModel.user.collectAsState().value) {
-                    isAuthenticated = authViewModel.user.value != null
+
+                LaunchedEffect(isLoading, authState) {
+                    startDestination = when {
+                        isLoading -> "splash"
+                        authState == AuthState.Authenticated -> "main"
+                        else -> "auth"
+                    }
+                    // Навигация теперь срабатывает только после установки NavHost
+                    navController.navigate(startDestination) {
+                        popUpTo(0) // Убираем дублирование экранов в стеке
+                    }
                 }
 
-                if (!isAuthenticated) {
-                    AuthScreen(authViewModel, googleSignInLauncher) {
-                        isAuthenticated = true
+
+                NavHost(navController, startDestination = startDestination) {
+                    composable("splash") { /* Пустой экран, управляется SplashScreen API */ }
+                    composable("auth") {
+                        AuthScreen(authViewModel, googleSignInLauncher) {
+                            navController.navigate("main") { popUpTo("auth") { inclusive = true } }
+                        }
                     }
-                } else {
-                    MainScreen(movieViewModel)
+                    composable("main") {
+                        MainScreen(movieViewModel, authViewModel, favoritesViewModel)
+                    }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MainScreen(viewModel: MovieViewModel) {
-    var selectedScreen by rememberSaveable { mutableStateOf(Screen.Search) }
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(selectedScreen) { selectedScreen = it }
-        }
-    ) { paddingValues ->
-        when (selectedScreen) {
-            Screen.Search -> SearchScreen(viewModel, paddingValues = paddingValues)
-            Screen.Favorites -> FavoritesScreen(Modifier.padding(paddingValues))
-            Screen.Settings -> SettingsScreen(Modifier.padding(paddingValues))
-        }
-    }
-}
-
-@Composable
-fun BottomNavigationBar(selectedScreen: Screen, onScreenSelected: (Screen) -> Unit) {
-    NavigationBar {
-        NavigationBarItem(
-            selected = selectedScreen == Screen.Search,
-            onClick = { onScreenSelected(Screen.Search) },
-            icon = { Icon(Icons.Default.Search, contentDescription = "Поиск") },
-            label = { Text("Поиск") }
-        )
-        NavigationBarItem(
-            selected = selectedScreen == Screen.Favorites,
-            onClick = { onScreenSelected(Screen.Favorites) },
-            icon = { Icon(Icons.Default.Favorite, contentDescription = "Избранное") },
-            label = { Text("Избранное") }
-        )
-        NavigationBarItem(
-            selected = selectedScreen == Screen.Settings,
-            onClick = { onScreenSelected(Screen.Settings) },
-            icon = { Icon(Icons.Default.Settings, contentDescription = "Настройки") },
-            label = { Text("Настройки") }
-        )
-    }
-}
 
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    val viewModel = MovieViewModel()
-    Watch_TogetherTheme {
-        MainScreen(viewModel)
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun GreetingPreview() {
+//    Watch_TogetherTheme {
+//        val movieViewModel: MovieViewModel = remember { MovieViewModel() }
+//        val authViewModel: AuthViewModel = remember { AuthViewModel() }
+//        val favoritesViewModel: FavoritesViewModel = remember { FavoritesViewModel(repository = )}
+//        MainScreen(movieViewModel, authViewModel, )
+//    }
+//}
+
+
+
