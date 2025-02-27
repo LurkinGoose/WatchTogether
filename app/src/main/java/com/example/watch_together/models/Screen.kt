@@ -1,18 +1,9 @@
 package com.example.watch_together.models
 
-sealed class Screen(val route: String) {
-    object Search : Screen("search")
-    object Favorites : Screen("favorites")
-    object Settings : Screen("settings")
-    object MovieDemo : Screen("movieDemo")
+sealed class Screen(val route: String, val label: String) {
+    object Search : Screen("search", "Поиск")
+    object Favorites : Screen("favorites", "Избранное")
+    object Settings : Screen("settings", "Настройки")
+    object MovieDemo : Screen("movieDemo", "Демо")
 
-    companion object {
-        fun fromRoute(route: String?): Screen {
-            return when (route) {
-                Favorites.route -> Favorites
-                Settings.route -> Settings
-                else -> Search
-            }
-        }
-    }
 }
