@@ -1,9 +1,13 @@
 package com.example.watch_together.models
 
-sealed class Screen(val route: String, val label: String) {
-    object Search : Screen("search", "Поиск")
-    object Favorites : Screen("favorites", "Избранное")
-    object Settings : Screen("settings", "Настройки")
-    object MovieDemo : Screen("movieDemo", "Демо")
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 
+sealed class Screen(val route: String, val title: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    object Search : Screen("search", "Поиск", Icons.Filled.Search)
+    object Favorites : Screen("favorites", "Избранное", Icons.Filled.Favorite)
+    object Settings : Screen("settings", "Настройки", Icons.Filled.Settings)
+    object MovieDemo : Screen("movieDemo", "Демо", Icons.Filled.Search) // добавь сюда иконку по необходимости
 }

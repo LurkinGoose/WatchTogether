@@ -1,46 +1,36 @@
 package com.example.watch_together.tabHost
 
-import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.watch_together.models.Screen
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route
 
     NavigationBar {
-        listOf(
-            Screen.Search to Icons.Default.Search,
-            Screen.Favorites to Icons.Default.Favorite,
-            Screen.Settings to Icons.Default.Settings
-        ).forEach { (screen, icon) ->
-            val isSelected = currentRoute == screen.route
-
-            NavigationBarItem(
-                selected = isSelected,
+        listOf(Screen.Search, Screen.Favorites, Screen.Settings).forEach { screen ->
+            NavigationBarItem (
+                selected = currentRoute == screen.route,
                 onClick = {
-                    Log.d("BottomNav", "Клик по вкладке: ${screen.route}, текущий экран: $currentRoute")
-
-                    if (!isSelected) {
-                        Log.d("BottomNav", "Выполняем переход на ${screen.route}")
+                    if (currentRoute != screen.route) {
                         navController.navigate(screen.route) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                saveState = true
+                            }
                             launchSingleTop = true
                             restoreState = true
                         }
-                    } else {
-                        Log.d("BottomNav", "Повторный клик на $currentRoute, переход НЕ выполняется")
                     }
                 },
-                icon = { Icon(icon, contentDescription = screen.route) },
-                label = { Text(screen.label) }
+                icon = { Icon(imageVector = screen.icon, contentDescription = screen.title) },
+                label = { Text(screen.title) }
             )
         }
     }
