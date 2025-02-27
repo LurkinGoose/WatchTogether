@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.*
 import com.example.watch_together.models.Screen
 import com.example.watch_together.screens.*
@@ -26,9 +27,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val movieViewModel: MovieViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
-    private val favoritesViewModel: FavoritesViewModel by viewModels()
+
 
 
     private val googleSignInLauncher =
@@ -58,6 +58,10 @@ class MainActivity : ComponentActivity() {
                 val authState by authViewModel.authState.collectAsState()
                 val startDestination = if (authState == AuthState.Authenticated) Screen.Search.route else "auth"
 
+                // Запоминаем ViewModel, чтобы он не пересоздавался
+                val movieViewModel: MovieViewModel = hiltViewModel()
+                val favoritesViewModel: FavoritesViewModel = hiltViewModel()
+
                 Scaffold(
                     bottomBar = {
                         if (authState == AuthState.Authenticated) {
@@ -78,22 +82,31 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable(Screen.Search.route) {
-                            SearchScreen(navController, movieViewModel, favoritesViewModel, paddingValues)
+                            Log.d("NavHost", "Отображается экран поиска")
+                            SearchScreen(navController, movieViewModel, favoritesViewModel)
                         }
-                        composable(Screen.Favorites.route) {
-                            FavoritesScreen(navController, movieViewModel, favoritesViewModel, paddingValues)
+                        composable(
+                            route = Screen.Favorites.route,
+                            enterTransition = { null },
+                            exitTransition = { null },
+                            popEnterTransition = { null },
+                            popExitTransition = { null }
+                        ) {
+                            Log.d("NavHost", "Отображается экран избранного")
+                            FavoritesScreen(navController, movieViewModel, favoritesViewModel)
                         }
-                        composable(Screen.Settings.route) {
-                            SettingsScreen(movieViewModel, authViewModel, paddingValues)
-                        }
-                        composable("movie_demo/{movieId}") { backStackEntry ->
-                            backStackEntry.arguments?.getString("movieId")?.toIntOrNull()?.let { movieId ->
-                                DemoScreen(movieId, movieViewModel) { navController.popBackStack() }
-                            }
-                        }
+//                        composable(Screen.Settings.route) {
+//                            SettingsScreen(movieViewModel, authViewModel, paddingValues)
+//                        }
+//                        composable("movieDemo/{movieId}") { backStackEntry ->
+//                            backStackEntry.arguments?.getString("movieId")?.toIntOrNull()?.let { movieId ->
+//                                DemoScreen(movieId, movieViewModel) { navController.popBackStack() }
+//                            }
+//                        }
                     }
                 }
             }
         }
     }
+
 }

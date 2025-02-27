@@ -6,9 +6,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.FavoritesViewModel
@@ -16,24 +17,18 @@ import com.example.watch_together.viewModels.MovieViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(
-    navController: NavController,
-    movieViewModel: MovieViewModel,
-    favoritesViewModel: FavoritesViewModel,
-    paddingValues: PaddingValues
-) {
-    Log.d("SearchScreen", "🔄 SearchScreen пересоздался")
+fun SearchScreen(navController: NavController,
+                 movieViewModel: MovieViewModel,
+                 favoritesViewModel: FavoritesViewModel) {
+
 
     val uiState by movieViewModel.uiState.collectAsState()
-    var query by remember { mutableStateOf("") }
+    var query by rememberSaveable { mutableStateOf("") }
 
+    Log.d("SearchScreen", "🔄 SearchScreen запустился")
     Log.d("SearchScreen", "📊 uiState обновился: loading=${uiState.loading}, movies=${uiState.movies.size}, error=${uiState.errorMessage}")
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         TextField(
             value = query,
             onValueChange = { query = it },
@@ -41,44 +36,29 @@ fun SearchScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         Button(
             onClick = {
                 Log.d("SearchScreen", "🔍 Запускаем поиск: $query")
                 movieViewModel.searchMovies(query)
+
             },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Поиск")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         if (uiState.loading) {
-            Log.d("SearchScreen", "⏳ Идет загрузка...")
             CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
         }
 
         uiState.errorMessage?.let {
-            Log.d("SearchScreen", "❌ Ошибка: $it")
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            Text(text = it, color = MaterialTheme.colorScheme.error)
         }
 
-        LazyColumn(
-            state = movieViewModel.saveListState,
-            modifier = Modifier.fillMaxSize()
-        ) {
+        LazyColumn {
             items(uiState.movies) { movie ->
-                Log.d("SearchScreen", "🎬 Добавляем фильм в список: ${movie.title} (ID: ${movie.id})")
                 MovieListItem(movie, favoritesViewModel) {
-                    Log.d("SearchScreen", "🎥 Выбран фильм: ${movie.title} (ID: ${movie.id})")
-                    navController.navigate("movieDemo")
-
+                    navController.navigate("movieDemo/${movie.id}")
                 }
             }
         }

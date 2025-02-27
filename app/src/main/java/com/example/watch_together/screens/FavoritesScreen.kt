@@ -11,29 +11,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
 
 @Composable
-fun FavoritesScreen(
-    navController: NavController,
-    movieViewModel: MovieViewModel,
-    favoritesViewModel: FavoritesViewModel,
-    paddingValues: PaddingValues
-) {
-    val uiState by favoritesViewModel.uiState.collectAsState()
-    Log.d("AppLog", "FavoriteScreen запустился")
+fun FavoritesScreen(navController: NavController,
+                    movieViewModel: MovieViewModel,
+                    favoritesViewModel: FavoritesViewModel) {
 
-    LaunchedEffect(Unit) {
-        favoritesViewModel.loadFavorites()
-    }
+
+    val uiState by favoritesViewModel.uiState.collectAsState()
+    val paddingValues = PaddingValues(0.dp)
+    Log.d("FavoriteScreen", "FavoriteScreen запустился")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
+            .padding()
             .background(Color.Transparent)
             .statusBarsPadding()
     ) {
