@@ -26,6 +26,8 @@ fun FavoritesScreen(navController: NavController,
     val uiState by favoritesViewModel.uiState.collectAsState()
     val paddingValues = PaddingValues(0.dp)
     Log.d("FavoriteScreen", "FavoriteScreen запустился")
+    Log.d("FavoritesScreen", "🔄 uiState: loading=${uiState.loading}, favorites=${uiState.favoriteMovies.size}")
+
 
     Column(
         modifier = Modifier

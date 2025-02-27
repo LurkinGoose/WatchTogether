@@ -16,8 +16,6 @@ fun BottomNavigationBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Log.d("BottomNavigationBar", "🔄 Создание BottomNavigationBar, текущий маршрут: $currentRoute")
-
     NavigationBar {
         listOf(
             Screen.Search to Icons.Default.Search,
@@ -26,17 +24,19 @@ fun BottomNavigationBar(navController: NavController) {
         ).forEach { (screen, icon) ->
             val isSelected = currentRoute == screen.route
 
-            Log.d("BottomNavigationBar", "▶️ Экран: ${screen.route}, выбран: $isSelected")
-
             NavigationBarItem(
                 selected = isSelected,
                 onClick = {
+                    Log.d("BottomNav", "Клик по вкладке: ${screen.route}, текущий экран: $currentRoute")
+
                     if (!isSelected) {
-                        Log.d("BottomNavigationBar", "✅ Переход на ${screen.route}")
+                        Log.d("BottomNav", "Выполняем переход на ${screen.route}")
                         navController.navigate(screen.route) {
-                            launchSingleTop = true  // Предотвращает повторные навигации на тот же экран
-                            restoreState = true     // Восстанавливает состояние экрана
+                            launchSingleTop = true
+                            restoreState = true
                         }
+                    } else {
+                        Log.d("BottomNav", "Повторный клик на $currentRoute, переход НЕ выполняется")
                     }
                 },
                 icon = { Icon(icon, contentDescription = screen.route) },

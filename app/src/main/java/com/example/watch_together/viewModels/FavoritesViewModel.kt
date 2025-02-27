@@ -23,7 +23,7 @@ class FavoritesViewModel @Inject constructor(
         loadFavorites()
     }
 
-    fun loadFavorites() {
+    private fun loadFavorites() {
         _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
 
         viewModelScope.launch {

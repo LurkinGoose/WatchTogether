@@ -33,19 +33,14 @@ class MovieViewModel @Inject constructor(
         }
     }
 
-    private val _movieDetails = MutableStateFlow<Movie?>(null)
-    val movieDetails: StateFlow<Movie?> = _movieDetails
-
     fun getMovieDetails(movieId: Int) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
             try {
                 val movie = repository.getMovieDetails(movieId)
-                _movieDetails.value = movie
+                _uiState.value = _uiState.value.copy(movieDetails = movie, loading = false)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Ошибка загрузки фильма: ${e.localizedMessage}")
-            } finally {
-                _uiState.value = _uiState.value.copy(loading = false)
+                _uiState.value = _uiState.value.copy(errorMessage = "Ошибка загрузки фильма: ${e.localizedMessage}", loading = false)
             }
         }
     }
@@ -55,6 +50,7 @@ class MovieViewModel @Inject constructor(
     }
 
     fun clearMovieDetails() {
-        _movieDetails.value = null
+        _uiState.value = _uiState.value.copy(movieDetails = null)
     }
+
 }
