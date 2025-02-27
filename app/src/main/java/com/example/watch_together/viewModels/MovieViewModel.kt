@@ -5,11 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.watch_together.models.Movie
 import com.example.watch_together.repository.MovieRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
+@HiltViewModel
+class MovieViewModel @Inject constructor(
+    private val repository: MovieRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MovieUiState())
     val uiState: StateFlow<MovieUiState> = _uiState
@@ -45,12 +50,10 @@ class MovieViewModel(private val repository: MovieRepository) : ViewModel() {
         }
     }
 
-    // Очистка списка фильмов
     fun clearMovies() {
         _uiState.value = _uiState.value.copy(movies = emptyList())
     }
 
-    // Очистка деталей фильма
     fun clearMovieDetails() {
         _movieDetails.value = null
     }

@@ -5,6 +5,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
+
 }
 
 android {
@@ -80,6 +82,9 @@ dependencies {
 
     implementation ("androidx.core:core-splashscreen:1.0.1")
 //    implementation ("com.github.prime-zs.toolkit:core-ktx:2.0.2")
+
+    implementation ("com.google.dagger:hilt-android:2.50")
+    ksp ("com.google.dagger:hilt-android-compiler:2.50")
 
     implementation("androidx.room:room-runtime:2.5.2")
     ksp("androidx.room:room-compiler:2.5.2")

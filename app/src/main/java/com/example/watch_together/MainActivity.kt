@@ -23,16 +23,18 @@ import com.example.watch_together.tabHost.BottomNavigationBar
 import com.example.watch_together.ui.theme.Watch_TogetherTheme
 import com.example.watch_together.viewModels.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private val movieViewModel: MovieViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
-    private val movieApiService by lazy { RetrofitInstance.api }
-    private val database by lazy { AppDatabase.getDatabase(this) }
-    private val favoriteMovieDao by lazy { database.favoriteMovieDao() }
-    private val movieRepository by lazy { MovieRepository(movieApiService, favoriteMovieDao, applicationContext) }
-    private val movieViewModel: MovieViewModel by viewModels { MovieViewModelFactory(movieRepository) }
-    private val favoritesViewModel: FavoritesViewModel by viewModels { FavoritesViewModelFactory(movieRepository) }
+    private val favoritesViewModel: FavoritesViewModel by viewModels()
+
+
+
+
 
     private val googleSignInLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
