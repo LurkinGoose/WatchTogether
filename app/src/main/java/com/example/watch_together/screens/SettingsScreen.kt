@@ -12,7 +12,7 @@ import com.example.watch_together.viewModels.MovieViewModel
 
 @Composable
 fun SettingsScreen(movieViewModel: MovieViewModel, authViewModel: AuthViewModel, paddingValues: PaddingValues) {
-    val context = LocalContext.current  // Получаем контекст
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -23,7 +23,7 @@ fun SettingsScreen(movieViewModel: MovieViewModel, authViewModel: AuthViewModel,
         Text(text = "Настройки", style = MaterialTheme.typography.headlineLarge)
 
         Button(
-            onClick = { authViewModel.signOut(context, movieViewModel) }, // Передаём контекст
+            onClick = { authViewModel.signOut(context, movieViewModel) },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Выйти из аккаунта")

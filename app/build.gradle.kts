@@ -4,8 +4,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
-    id("com.google.devtools.ksp")
+//    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("kotlin-kapt")
 
 }
 
@@ -84,11 +85,11 @@ dependencies {
 //    implementation ("com.github.prime-zs.toolkit:core-ktx:2.0.2")
 
     implementation ("com.google.dagger:hilt-android:2.50")
-    ksp ("com.google.dagger:hilt-android-compiler:2.50")
+    kapt("com.google.dagger:hilt-android-compiler:2.50")
 
-    implementation("androidx.room:room-runtime:2.5.2")
-    ksp("androidx.room:room-compiler:2.5.2")
-    implementation("androidx.room:room-ktx:2.5.2")
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")

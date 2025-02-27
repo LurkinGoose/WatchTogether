@@ -9,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
@@ -16,9 +17,9 @@ import com.example.watch_together.viewModels.MovieViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    navController: NavController,
     movieViewModel: MovieViewModel,
     favoritesViewModel: FavoritesViewModel,
-    onMovieSelected: (Int) -> Unit,
     paddingValues: PaddingValues
 ) {
     Log.d("SearchScreen", "🔄 SearchScreen пересоздался")
@@ -76,7 +77,8 @@ fun SearchScreen(
                 Log.d("SearchScreen", "🎬 Добавляем фильм в список: ${movie.title} (ID: ${movie.id})")
                 MovieListItem(movie, favoritesViewModel) {
                     Log.d("SearchScreen", "🎥 Выбран фильм: ${movie.title} (ID: ${movie.id})")
-                    onMovieSelected(movie.id)
+                    navController.navigate("movieDemo")
+
                 }
             }
         }

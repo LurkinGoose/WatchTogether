@@ -16,8 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.*
 import com.example.watch_together.models.Screen
-import com.example.watch_together.movieApiService.RetrofitInstance
-import com.example.watch_together.repository.MovieRepository
 import com.example.watch_together.screens.*
 import com.example.watch_together.tabHost.BottomNavigationBar
 import com.example.watch_together.ui.theme.Watch_TogetherTheme
@@ -31,9 +29,6 @@ class MainActivity : ComponentActivity() {
     private val movieViewModel: MovieViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
     private val favoritesViewModel: FavoritesViewModel by viewModels()
-
-
-
 
 
     private val googleSignInLauncher =
@@ -83,17 +78,13 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable(Screen.Search.route) {
-                            SearchScreen(movieViewModel, favoritesViewModel) { movieId ->
-                                navController.navigate("movie_demo/$movieId")
-                            }
+                            SearchScreen(navController, movieViewModel, favoritesViewModel, paddingValues)
                         }
                         composable(Screen.Favorites.route) {
-                            FavoritesScreen(movieViewModel, favoritesViewModel) { movieId ->
-                                navController.navigate("movie_demo/$movieId")
-                            }
+                            FavoritesScreen(navController, movieViewModel, favoritesViewModel, paddingValues)
                         }
                         composable(Screen.Settings.route) {
-                            SettingsScreen(movieViewModel, authViewModel)
+                            SettingsScreen(movieViewModel, authViewModel, paddingValues)
                         }
                         composable("movie_demo/{movieId}") { backStackEntry ->
                             backStackEntry.arguments?.getString("movieId")?.toIntOrNull()?.let { movieId ->
