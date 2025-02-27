@@ -57,6 +57,9 @@ class MainActivity : ComponentActivity() {
                 val movieViewModel: MovieViewModel = hiltViewModel()
                 val favoritesViewModel: FavoritesViewModel = hiltViewModel()
 
+                // Устанавливаем начальный экран в зависимости от состояния авторизации
+                val startDestination = if (authState == AuthState.Authenticated) Screen.Search.route else "auth"
+
                 Scaffold(
                     bottomBar = {
                         if (authState == AuthState.Authenticated) {
@@ -66,17 +69,15 @@ class MainActivity : ComponentActivity() {
                 ) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = "auth",
+                        startDestination = startDestination,
                         modifier = Modifier.padding(paddingValues)
                     ) {
                         composable("auth") {
                             Log.d("NavHost", "Отображается экран авторизации")
                             AuthScreen(authViewModel, googleSignInLauncher) {
                                 Log.d("NavHost", "Навигация из AuthScreen в SearchScreen")
-                                if (navController.currentDestination?.route != Screen.Search.route) {
-                                    navController.navigate(Screen.Search.route) {
-                                        popUpTo("auth") { inclusive = true }
-                                    }
+                                navController.navigate(Screen.Search.route) {
+                                    popUpTo("auth") { inclusive = true } // Удаляем AuthScreen из стека
                                 }
                             }
                         }
@@ -90,22 +91,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-
-                // ❌ Убираем дублирующий переход из LaunchedEffect
-                LaunchedEffect(authState) {
-                    if (authState == AuthState.Authenticated) {
-                        Log.d("NavHost", "Проверяем необходимость перехода")
-                        if (navController.currentDestination?.route != Screen.Search.route) {
-                            Log.d("NavHost", "Переход на SearchScreen после авторизации")
-                            navController.navigate(Screen.Search.route) {
-                                popUpTo("auth") { inclusive = true }
-                            }
-                        }
-                    }
-                }
             }
         }
-
-
     }
 }

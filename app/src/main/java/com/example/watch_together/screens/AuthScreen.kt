@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import com.example.watch_together.viewModels.AuthViewModel
 
 @Composable
@@ -23,17 +24,19 @@ fun AuthScreen(
     val user by viewModel.user.collectAsState()
     val googleSignInClient = remember { viewModel.getGoogleSignInClient(context) } // Передаём контекст
 
+    // Проверяем пользователя, но только если он еще на экране авторизации
     LaunchedEffect(user) {
         Log.d("AuthScreen", "Auth state changed: $user")
         if (user != null) {
             Log.d("AuthScreen", "User authenticated, navigating to main screen")
-            onAuthSuccess()
+            onAuthSuccess() // Вызываем навигацию
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Button(onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }) {
@@ -41,4 +44,3 @@ fun AuthScreen(
         }
     }
 }
-
