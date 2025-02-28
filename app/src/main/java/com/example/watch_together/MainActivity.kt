@@ -51,14 +51,7 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_Watch_Together)
         super.onCreate(savedInstanceState)
 
-        StrictMode.setThreadPolicy(
-            StrictMode.ThreadPolicy.Builder()
-                .detectAll()
-                .penaltyLog()
-                .build()
-        )
-
-        enableEdgeToEdge()
+//        enableEdgeToEdge()
         installSplashScreen().setKeepOnScreenCondition { false }
 
         setContent {
@@ -79,7 +72,7 @@ class MainActivity : ComponentActivity() {
                 ) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = Screen.Search.route,
+                        startDestination = startDestination,
                         modifier = Modifier.padding(paddingValues),
 
                         enterTransition = { EnterTransition.None },

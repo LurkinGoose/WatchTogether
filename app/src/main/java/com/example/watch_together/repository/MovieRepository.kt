@@ -4,8 +4,11 @@ import com.example.watch_together.models.FavoriteMovieDao
 import com.example.watch_together.models.FavoriteMovieEntity
 import com.example.watch_together.models.Movie
 import com.example.watch_together.movieApiService.MovieApiService
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,14 +34,13 @@ class MovieRepository @Inject constructor(
     }
 
     fun getAllFavorites(): Flow<List<Movie>> = flow {
-        val favoriteEntities = favoriteMovieDao.getAllFavorites()
+        val favoriteEntities = withContext(Dispatchers.IO) { favoriteMovieDao.getAllFavorites() }
         val favoriteMovies = favoriteEntities.mapNotNull { entity ->
-            try {
-                apiService.getMovieById(entity.movieId)
-            } catch (e: Exception) {
-                null
-            }
+            kotlin.runCatching {
+                withContext(Dispatchers.IO) { apiService.getMovieById(entity.movieId) }
+            }.getOrNull()
         }
         emit(favoriteMovies)
-    }
+    }.flowOn(Dispatchers.IO) // 🔥 Переводим выполнение в фоновый поток
+
 }
