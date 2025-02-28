@@ -3,7 +3,6 @@ package com.example.watch_together.screens
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -18,13 +17,13 @@ import coil.compose.AsyncImage
 import com.example.watch_together.viewModels.MovieViewModel
 
 @Composable
-fun DemoScreen(
+fun DetailsScreen(
     movieId: Int,
     movieViewModel: MovieViewModel,
     onDismiss: () -> Unit
 ) {
     val uiState by movieViewModel.uiState.collectAsState()
-    Log.d("AppLog", "DemoScreen запущен с movieId: $movieId")
+//    Log.d("AppLog", "DetailsScreen запущен с movieId: $movieId")
 
     LaunchedEffect(movieId) {
         movieViewModel.getMovieDetails(movieId)

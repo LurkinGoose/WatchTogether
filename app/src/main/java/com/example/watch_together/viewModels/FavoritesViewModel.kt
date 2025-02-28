@@ -2,7 +2,6 @@ package com.example.watch_together.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.watch_together.models.Movie
 import com.example.watch_together.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,7 @@ class FavoritesViewModel @Inject constructor(
     }
 
     private fun loadFavorites() {
-        _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
+        _uiState.value = _uiState.value.copy(loading = true)
 
         viewModelScope.launch {
             repository.getAllFavorites().collectLatest { favorites ->
@@ -36,14 +35,18 @@ class FavoritesViewModel @Inject constructor(
     fun addToFavorites(movieId: Int) {
         viewModelScope.launch {
             repository.addToFavorites(movieId)
-            loadFavorites()
+            _uiState.value = _uiState.value.copy(
+                favoriteMovies = _uiState.value.favoriteMovies + repository.getMovieById(movieId)
+            )
         }
     }
 
     fun removeFromFavorites(movieId: Int) {
         viewModelScope.launch {
             repository.removeFromFavorites(movieId)
-            loadFavorites()
+            _uiState.value = _uiState.value.copy(
+                favoriteMovies = _uiState.value.favoriteMovies.filterNot { it.id == movieId }
+            )
         }
     }
 }

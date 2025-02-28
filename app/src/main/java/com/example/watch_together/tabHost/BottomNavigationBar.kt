@@ -1,37 +1,42 @@
 package com.example.watch_together.tabHost
 
+import android.util.Log
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.watch_together.models.Screen
 
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val navBackStackEntry = navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry.value?.destination?.route
-
+fun BottomNavigationBar(modifier: Modifier, navController: NavHostController
+) {
     NavigationBar {
-        listOf(Screen.Search, Screen.Favorites, Screen.Settings).forEach { screen ->
-            NavigationBarItem (
-                selected = currentRoute == screen.route,
-                onClick = {
-                    if (currentRoute != screen.route) {
-                        navController.navigate(screen.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = { Icon(imageVector = screen.icon, contentDescription = screen.title) },
-                label = { Text(screen.title) }
-            )
-        }
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Search, contentDescription = "Home") },
+            label = { Text("Search") },
+            selected = false,
+            onClick = { navController.navigate("search") }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") },
+            label = { Text("Favorites") },
+            selected = false,
+            onClick = { navController.navigate("favorites") }
+        )
+        NavigationBarItem(icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = false,
+            onClick = { navController.navigate("settings") }
+        )
     }
 }

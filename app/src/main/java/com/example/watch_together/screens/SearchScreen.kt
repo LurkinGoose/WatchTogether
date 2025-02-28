@@ -15,18 +15,30 @@ import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.FavoritesViewModel
 import com.example.watch_together.viewModels.MovieViewModel
 
+//fun SearchScreen() {
+//
+//    Log.d("SearchScreen", "SearchScreen")
+//    Box(modifier = Modifier.fillMaxSize()){
+//        Text(modifier = Modifier.align(Alignment.Center), text = "Поиск")
+//    }
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController,
-                 movieViewModel: MovieViewModel,
-                 favoritesViewModel: FavoritesViewModel) {
-
-
+fun SearchScreen(
+    navController: NavController,
+    movieViewModel: MovieViewModel,
+    favoritesViewModel: FavoritesViewModel
+) {
     val uiState by movieViewModel.uiState.collectAsState()
     var query by rememberSaveable { mutableStateOf("") }
 
-    Log.d("SearchScreen", "🔄 SearchScreen запустился")
-    Log.d("SearchScreen", "📊 uiState обновился: loading=${uiState.loading}, movies=${uiState.movies.size}, error=${uiState.errorMessage}")
+    val onSearchClick = {
+        Log.d("SearchScreen", "🔍 Запускаем поиск: $query")
+        movieViewModel.searchMovies(query)
+    }
+
+    val favoriteMovies = favoritesViewModel.uiState.collectAsState().value.favoriteMovies
 
     Column(modifier = Modifier.fillMaxSize()) {
         TextField(
@@ -37,11 +49,7 @@ fun SearchScreen(navController: NavController,
         )
 
         Button(
-            onClick = {
-                Log.d("SearchScreen", "🔍 Запускаем поиск: $query")
-                movieViewModel.searchMovies(query)
-
-            },
+            onClick = onSearchClick,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Поиск")
@@ -56,9 +64,10 @@ fun SearchScreen(navController: NavController,
         }
 
         LazyColumn {
-            items(uiState.movies) { movie ->
-                MovieListItem(movie, favoritesViewModel) {
-                    navController.navigate("movieDemo/${movie.id}")
+            items(uiState.movies, key = { it.id }) { movie ->
+                val isFavorite = favoriteMovies.any { it.id == movie.id }
+                MovieListItem(movie, favoritesViewModel, isFavorite) {
+                    navController.navigate("movie_details/${movie.id}") // Переход на страницу деталей
                 }
             }
         }

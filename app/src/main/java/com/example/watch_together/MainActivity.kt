@@ -1,6 +1,7 @@
 package com.example.watch_together
 
 import android.os.Bundle
+import android.os.StrictMode
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,13 +9,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.Navigation
 import androidx.navigation.compose.*
 import com.example.watch_together.models.Screen
 import com.example.watch_together.screens.*
@@ -47,6 +53,13 @@ class MainActivity : ComponentActivity() {
         setTheme(R.style.Theme_Watch_Together)
         super.onCreate(savedInstanceState)
 
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build()
+        )
+
         enableEdgeToEdge()
         installSplashScreen().setKeepOnScreenCondition { false }
 
@@ -56,40 +69,58 @@ class MainActivity : ComponentActivity() {
                 val authState by authViewModel.authState.collectAsState()
                 val movieViewModel: MovieViewModel = hiltViewModel()
                 val favoritesViewModel: FavoritesViewModel = hiltViewModel()
-
-                // Устанавливаем начальный экран в зависимости от состояния авторизации
                 val startDestination = if (authState == AuthState.Authenticated) Screen.Search.route else "auth"
 
                 Scaffold(
                     bottomBar = {
                         if (authState == AuthState.Authenticated) {
-                            BottomNavigationBar(navController)
+                            BottomNavigationBar(modifier = Modifier.fillMaxWidth(), navController = navController)
                         }
+//                        BottomNavigationBar(modifier = Modifier.fillMaxWidth(), navController = navController)
                     }
                 ) { paddingValues ->
                     NavHost(
                         navController = navController,
-                        startDestination = startDestination,
-                        modifier = Modifier.padding(paddingValues)
+                        startDestination = Screen.Search.route,
+                        modifier = Modifier.padding(paddingValues),
+
+                        enterTransition = { EnterTransition.None },
+                        exitTransition = { ExitTransition.None },
+                        popEnterTransition = { EnterTransition.None },
+                        popExitTransition = { ExitTransition.None }
                     ) {
+
                         composable("auth") {
-                            Log.d("NavHost", "Отображается экран авторизации")
                             AuthScreen(authViewModel, googleSignInLauncher) {
-                                Log.d("NavHost", "Навигация из AuthScreen в SearchScreen")
                                 navController.navigate(Screen.Search.route) {
-                                    popUpTo("auth") { inclusive = true } // Удаляем AuthScreen из стека
+                                    popUpTo("auth") { inclusive = true }
                                 }
                             }
                         }
+
                         composable(Screen.Search.route) {
-                            Log.d("NavHost", "Навигация на экран поиска")
                             SearchScreen(navController, movieViewModel, favoritesViewModel)
                         }
+
                         composable(Screen.Favorites.route) {
-                            Log.d("NavHost", "Навигация на экран избранного")
                             FavoritesScreen(navController, movieViewModel, favoritesViewModel)
                         }
+
+                        composable(Screen.Settings.route) {
+                            SettingsScreen(movieViewModel, authViewModel, paddingValues)
+                        }
+
+                        // 🔥 Добавляем маршрут для `DetailsScreen`
+                        composable("movie_details/{movieId}") { backStackEntry ->
+                            val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
+                            movieId?.let {
+                                DetailsScreen(it, movieViewModel) {
+                                    navController.popBackStack()
+                                }
+                            }
+                        }
                     }
+
                 }
             }
         }

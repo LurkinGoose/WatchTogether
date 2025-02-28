@@ -22,35 +22,48 @@ class MovieViewModel @Inject constructor(
     val saveListState = LazyListState()
 
     fun searchMovies(query: String) {
+        if (_uiState.value.loading) return // ✅ Пропускаем, если уже идёт загрузка
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(loading = true)
+            _uiState.updateIfChanged { it.copy(loading = true) } // ✅ Обновляем, только если изменилось
+
             try {
                 val movies = repository.searchMovies(query)
-                _uiState.value = _uiState.value.copy(movies = movies, loading = false)
+                _uiState.updateIfChanged {
+                    if (it.movies != movies) it.copy(movies = movies, loading = false, errorMessage = null)
+                    else it.copy(loading = false) // ✅ Не обновляем, если фильмы такие же
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = e.localizedMessage, loading = false)
+                _uiState.updateIfChanged { it.copy(errorMessage = e.localizedMessage, loading = false) }
             }
         }
     }
 
     fun getMovieDetails(movieId: Int) {
+        if (_uiState.value.loading) return // ✅ Избегаем повторного запроса
+
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(loading = true, errorMessage = null)
+            _uiState.updateIfChanged { it.copy(loading = true, errorMessage = null) }
+
             try {
-                val movie = repository.getMovieDetails(movieId)
-                _uiState.value = _uiState.value.copy(movieDetails = movie, loading = false)
+                val movie = repository.getMovieById(movieId)
+                _uiState.updateIfChanged { it.copy(movieDetails = movie, loading = false) }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Ошибка загрузки фильма: ${e.localizedMessage}", loading = false)
+                _uiState.updateIfChanged { it.copy(errorMessage = "Ошибка загрузки фильма: ${e.localizedMessage}", loading = false) }
             }
         }
     }
 
     fun clearMovies() {
-        _uiState.value = _uiState.value.copy(movies = emptyList())
+        _uiState.updateIfChanged { it.copy(movies = emptyList()) }
     }
 
     fun clearMovieDetails() {
-        _uiState.value = _uiState.value.copy(movieDetails = null)
+        _uiState.updateIfChanged { it.copy(movieDetails = null) }
     }
 
+    private inline fun MutableStateFlow<MovieUiState>.updateIfChanged(update: (MovieUiState) -> MovieUiState) {
+        val newState = update(value)
+        if (newState != value) value = newState // ✅ Меняем только если есть изменения
+    }
 }

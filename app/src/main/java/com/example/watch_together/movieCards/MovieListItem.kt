@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,84 +20,63 @@ import coil.compose.AsyncImagePainter
 import com.example.watch_together.models.Movie
 import com.example.watch_together.viewModels.FavoritesViewModel
 
-
 @Composable
-fun MovieListItem(moviesList: Movie, favoritesViewModel: FavoritesViewModel, onClick: () -> Unit) {
-    var imageState by remember { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
-
-    val uiState by favoritesViewModel.uiState.collectAsState() // ✅ Подписываемся на uiState
-    val isFavorite = uiState.favoriteMovies.any { it.id == moviesList.id } // ✅ Используем uiState
-
+fun MovieListItem(
+    movie: Movie,
+    favoritesViewModel: FavoritesViewModel,
+    isFavorite: Boolean,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.White)
-            .padding(start = 8.dp)
+            .clickable { onClick() }
+            .padding(start = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .width(130.dp)
                 .height(227.dp)
                 .background(color = Color.Transparent)
-                .padding(top = 16.dp, bottom = 16.dp)
+                .padding(16.dp)
         ) {
             AsyncImage(
-                model = moviesList.fullPosterPath,
-                contentDescription = moviesList.title,
+                model = movie.fullPosterPath,
+                contentDescription = movie.title,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-                onState = { state -> imageState = state }
+                contentScale = ContentScale.Fit
             )
-            when (imageState) {
-                is AsyncImagePainter.State.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                }
-                is AsyncImagePainter.State.Error -> {
-                    Icon(
-                        imageVector = Icons.Filled.Refresh,
-                        contentDescription = "Перезагрузить постер",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                else -> Unit
-            }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable { onClick() },
-            verticalAlignment = Alignment.Top,
+        Column(
+            modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = moviesList.title,
+                text = movie.title,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Normal,
-                lineHeight = 18.sp,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 16.dp)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 8.dp)
             )
+        }
 
-            IconButton(
-                onClick = {
-                    if (isFavorite) {
-                        favoritesViewModel.removeFromFavorites(moviesList.id)
-                    } else {
-                        favoritesViewModel.addToFavorites(moviesList.id)
-                    }
-                },
-                modifier = Modifier.size(56.dp)
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Удалить из избранного" else "Добавить в избранное",
-                    tint = if (isFavorite) Color.Red else Color.Gray,
-                    modifier = Modifier.size(24.dp)
-                )
+        IconButton(
+            onClick = {
+                if (isFavorite) {
+                    favoritesViewModel.removeFromFavorites(movie.id)
+                } else {
+                    favoritesViewModel.addToFavorites(movie.id)
+                }
             }
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = if (isFavorite) "Удалить из избранного" else "Добавить в избранное",
+                tint = if (isFavorite) Color.Red else Color.Gray
+            )
         }
     }
 }

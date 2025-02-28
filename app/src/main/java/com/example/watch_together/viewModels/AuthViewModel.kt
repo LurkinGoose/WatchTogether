@@ -2,9 +2,11 @@ package com.example.watch_together.viewModels
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.*
 import com.google.firebase.auth.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -27,12 +29,14 @@ class AuthViewModel : ViewModel() {
 
     fun signInWithGoogle(account: GoogleSignInAccount, onResult: (Boolean, String?) -> Unit) {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                _user.value = auth.currentUser
-                _authState.value = if (task.isSuccessful) AuthState.Authenticated else AuthState.Unauthenticated
-                onResult(task.isSuccessful, task.exception?.message)
-            }
+        viewModelScope.launch {
+            auth.signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    _user.value = auth.currentUser
+                    _authState.value = if (task.isSuccessful) AuthState.Authenticated else AuthState.Unauthenticated
+                    onResult(task.isSuccessful, task.exception?.message)
+                }
+        }
     }
 
     fun signOut(context: Context, movieViewModel: MovieViewModel) {

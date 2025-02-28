@@ -9,5 +9,5 @@ sealed class Screen(val route: String, val title: String, val icon: androidx.com
     object Search : Screen("search", "Поиск", Icons.Filled.Search)
     object Favorites : Screen("favorites", "Избранное", Icons.Filled.Favorite)
     object Settings : Screen("settings", "Настройки", Icons.Filled.Settings)
-    object MovieDemo : Screen("movieDemo", "Демо", Icons.Filled.Search) // добавь сюда иконку по необходимости
+    object MovieDemo : Screen("movie_cart", "Карточка фильма", Icons.Filled.Search) // добавь сюда иконку по необходимости
 }
