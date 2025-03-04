@@ -18,7 +18,6 @@ class MovieViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(MovieUiState())
     val uiState: StateFlow<MovieUiState> = _uiState
-
     val saveListState = LazyListState()
 
     fun searchMovies(query: String) {

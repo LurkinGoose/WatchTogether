@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.FavoritesViewModel
@@ -22,14 +23,12 @@ fun FavoritesScreen(
     movieViewModel: MovieViewModel,
     favoritesViewModel: FavoritesViewModel
 ) {
-    val uiState by favoritesViewModel.uiState.collectAsState()
+    val uiState by favoritesViewModel.uiState.collectAsStateWithLifecycle()
 
-    // Запоминаем favoriteMovies, чтобы экран не перерисовывался без причины
-    val favoriteMovies = remember(uiState.favoriteMovies) { uiState.favoriteMovies }
+    // Получаем список избранных фильмов
+    val favoriteMovies = uiState.favoriteMovies
 
-    LaunchedEffect(favoriteMovies) {
-        Log.d("FavoritesScreen", "favoriteMovies обновились: ${favoriteMovies.size} фильмов")
-    }
+    Log.d("FavoritesScreen", "favoriteMovies обновились: ${favoriteMovies.size} фильмов")
 
     Column(
         modifier = Modifier
@@ -48,7 +47,7 @@ fun FavoritesScreen(
                 uiState.loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                favoriteMovies.isEmpty() -> {
+                favoriteMovies.isEmpty() -> { // Исправлено, убрал `favoritesViewModel.isEmpty()`
                     Text(
                         text = "Список избранных фильмов пуст",
                         modifier = Modifier.align(Alignment.Center),
