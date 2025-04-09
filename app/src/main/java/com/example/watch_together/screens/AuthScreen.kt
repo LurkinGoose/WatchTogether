@@ -20,16 +20,13 @@ fun AuthScreen(
     googleSignInLauncher: ActivityResultLauncher<Intent>,
     onAuthSuccess: () -> Unit
 ) {
-    val context = LocalContext.current  // Получаем контекст
+    val context = LocalContext.current
+    val googleSignInClient = remember { viewModel.getGoogleSignInClient(context) }
     val user by viewModel.user.collectAsState()
-    val googleSignInClient = remember { viewModel.getGoogleSignInClient(context) } // Передаём контекст
 
-    // Проверяем пользователя, но только если он еще на экране авторизации
     LaunchedEffect(user) {
-        Log.d("AuthScreen", "Auth state changed: $user")
         if (user != null) {
-            Log.d("AuthScreen", "User authenticated, navigating to main screen")
-            onAuthSuccess() // Вызываем навигацию
+            onAuthSuccess()
         }
     }
 
@@ -39,8 +36,11 @@ fun AuthScreen(
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        Button(onClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) }) {
-            Text("Войти через Google")
+        Button(onClick = {
+            googleSignInLauncher.launch(googleSignInClient.signInIntent)
+        }) {
+            Text("Войти с помощью Google")
         }
     }
 }
+

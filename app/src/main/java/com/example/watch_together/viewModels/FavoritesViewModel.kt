@@ -18,13 +18,8 @@ class FavoritesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState
 
-    init {
-        loadFavorites()
-    }
-
-    private fun loadFavorites() {
+    fun loadFavorites() {
         _uiState.value = _uiState.value.copy(loading = true)
-
         viewModelScope.launch {
             repository.getAllFavorites().collectLatest { favorites ->
                 _uiState.value = _uiState.value.copy(favoriteMovies = favorites, loading = false)
