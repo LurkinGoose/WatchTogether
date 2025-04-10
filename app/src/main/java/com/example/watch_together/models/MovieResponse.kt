@@ -1,6 +1,6 @@
 package com.example.watch_together.models
 
-data class MovieResponse(val results: List<Movie>)
+data class MovieList(val results: List<Movie>)
 
 data class Movie(
     val title: String,

@@ -1,6 +1,5 @@
 package com.example.watch_together
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +22,8 @@ import com.example.watch_together.viewModels.*
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import dagger.hilt.android.AndroidEntryPoint
 import android.util.Log
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -55,18 +56,18 @@ class MainActivity : ComponentActivity() {
             Watch_TogetherTheme {
                 val navController = rememberNavController()
                 val user by authViewModel.user.collectAsState()
+                val moviesViewModel: MoviesViewModel = hiltViewModel()
 
-                val movieViewModel: MovieViewModel = hiltViewModel()
-                val favoritesViewModel: FavoritesViewModel = hiltViewModel()
-
-                val startDestination = if (user != null) Screen.Search.route else "auth"
+                val startDestination = if (user != null) "search" else "auth"
 
                 Scaffold(
                     bottomBar = {
                         if (user != null) {
                             BottomNavigationBar(
                                 modifier = Modifier.fillMaxWidth(),
-                                navController = navController
+                                navController = navController,
+                                currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route ?: "search",
+                                moviesViewModel = moviesViewModel
                             )
                         }
                     }
@@ -78,32 +79,45 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("auth") {
                             AuthScreen(authViewModel, googleSignInLauncher) {
-                                navController.navigate(Screen.Search.route) {
+                                navController.navigate("search") {
                                     popUpTo("auth") { inclusive = true }
                                 }
                             }
                         }
 
-                        composable(Screen.Search.route) {
-                            Log.d("SCREEN", "Открыт экран: Search")
-                            SearchScreen(navController, movieViewModel, favoritesViewModel)
+                        composable("search") {
+//                            Log.d("SCREEN", "Открыт экран: Search")
+                            SearchScreen(navController, moviesViewModel)
                         }
 
-                        composable(Screen.Favorites.route) {
-                            Log.d("SCREEN", "Открыт экран: Favorites")
-                            FavoritesScreen(navController, movieViewModel, favoritesViewModel)
+                        composable("favorites") {
+//                            Log.d("SCREEN", "Открыт экран: Favorites")
+                            FavoritesScreen(navController, moviesViewModel)
                         }
 
-                        composable(Screen.Settings.route) {
-                            Log.d("SCREEN", "Открыт экран: Settings")
-                            SettingsScreen(movieViewModel, authViewModel, paddingValues)
+                        composable("settings") {
+//                            Log.d("SCREEN", "Открыт экран: Settings")
+                            SettingsScreen(moviesViewModel, authViewModel, paddingValues)
                         }
 
-                        composable("movie_details/{movieId}") { backStackEntry ->
+                        composable("movie_details/{movieId}",
+
+                            enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentTransitionScope.SlideDirection.Left,
+                                animationSpec = tween(700)
+                            )
+                        },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
+                                    animationSpec = tween(700)
+                                )
+                            }) { backStackEntry ->
                             val movieId = backStackEntry.arguments?.getString("movieId")?.toIntOrNull()
                             movieId?.let {
-                                Log.d("SCREEN", "Открыт экран: Details для movieId=$it")
-                                DetailsScreen(it, movieViewModel) {
+//                                Log.d("SCREEN", "Открыт экран: Details для movieId=$it")
+                                DetailsScreen(it, moviesViewModel) {
                                     navController.popBackStack()
                                 }
                             }

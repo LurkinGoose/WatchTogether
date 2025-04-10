@@ -1,13 +1,10 @@
 package com.example.watch_together.viewModels
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.*
 import com.google.firebase.auth.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -32,13 +29,13 @@ class AuthViewModel : ViewModel() {
             }
     }
 
-    fun signOut(context: Context, movieViewModel: MovieViewModel) {
+    fun signOut(context: Context, moviesViewModel: MoviesViewModel) {
         val googleSignInClient = getGoogleSignInClient(context)
         googleSignInClient.signOut().addOnCompleteListener {
             googleSignInClient.revokeAccess().addOnCompleteListener {
                 auth.signOut()
                 _user.value = null
-                movieViewModel.clearMovies()
+                moviesViewModel.clearMovies()
             }
         }
     }

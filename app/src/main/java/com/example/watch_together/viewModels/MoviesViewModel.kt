@@ -19,8 +19,6 @@ class MoviesViewModel @Inject constructor(
     private val repository: MovieRepository
 ) : ViewModel() {
 
-    val saveListState = LazyListState()
-
     var movies by mutableStateOf<List<Movie>>(emptyList())
         private set
 
@@ -36,7 +34,28 @@ class MoviesViewModel @Inject constructor(
     var error by mutableStateOf<String?>(null)
         private set
 
+    // состояние скролла поиска
+    var searchListState: LazyListState = LazyListState()
+        private set
+
+    // состояние скролла избранного
+    var favoritesListState: LazyListState = LazyListState()
+        private set
+
+    fun resetSearchScrollPosition() {
+        viewModelScope.launch {
+            searchListState.scrollToItem(0)
+        }
+    }
+
+    fun resetFavoritesScrollPosition() {
+        viewModelScope.launch {
+            favoritesListState.scrollToItem(0)
+        }
+    }
+
     fun searchMovies(query: String) {
+        resetSearchScrollPosition()
         viewModelScope.launch {
             isLoading = true
             error = null
@@ -49,6 +68,21 @@ class MoviesViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadTopRatedMovies() {
+        viewModelScope.launch {
+            isLoading = true
+            error = null
+            try {
+                movies = repository.getTopRatedMovies()
+            } catch (e: Exception) {
+                error = e.localizedMessage
+            } finally {
+                isLoading = false
+            }
+        }
+    }
+
 
     fun getMovieDetails(id: Int) {
         viewModelScope.launch {
@@ -92,10 +126,6 @@ class MoviesViewModel @Inject constructor(
             repository.removeFromFavorites(movieId)
             favorites = favorites.filterNot { it.id == movieId }
         }
-    }
-
-    fun clearDetails() {
-        movieDetails = null
     }
 
     fun clearMovies() {

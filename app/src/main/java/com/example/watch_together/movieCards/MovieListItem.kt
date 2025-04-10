@@ -16,19 +16,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
 import com.example.watch_together.models.Movie
-import com.example.watch_together.viewModels.FavoritesViewModel
+import com.example.watch_together.viewModels.MoviesViewModel
 
 @Composable
 fun MovieListItem(
     movie: Movie,
-    favoritesViewModel: FavoritesViewModel,
+    favoritesViewModel: MoviesViewModel,
     isFavorite: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(color = Color.White)
             .clickable { onClick() }

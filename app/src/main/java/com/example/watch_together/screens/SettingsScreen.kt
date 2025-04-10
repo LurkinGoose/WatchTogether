@@ -8,10 +8,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.watch_together.viewModels.AuthViewModel
-import com.example.watch_together.viewModels.MovieViewModel
+import com.example.watch_together.viewModels.MoviesViewModel
+
 
 @Composable
-fun SettingsScreen(movieViewModel: MovieViewModel, authViewModel: AuthViewModel, paddingValues: PaddingValues) {
+fun SettingsScreen(moviesViewModel: MoviesViewModel, authViewModel: AuthViewModel, paddingValues: PaddingValues) {
     val context = LocalContext.current
 
     Column(
@@ -23,7 +24,7 @@ fun SettingsScreen(movieViewModel: MovieViewModel, authViewModel: AuthViewModel,
         Text(text = "Настройки", style = MaterialTheme.typography.headlineLarge)
 
         Button(
-            onClick = { authViewModel.signOut(context, movieViewModel) },
+            onClick = { authViewModel.signOut(context, moviesViewModel) },
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
             Text("Выйти из аккаунта")

@@ -19,27 +19,25 @@ import com.example.watch_together.viewModels.MoviesViewModel
 @Composable
 fun DetailsScreen(
     movieId: Int,
-    viewModel: MoviesViewModel,
+    moviesViewModel: MoviesViewModel,
     onDismiss: () -> Unit
 ) {
     // Загружаем данные при первом появлении экрана
     LaunchedEffect(movieId) {
-        viewModel.getMovieDetails(movieId)
+        moviesViewModel.getMovieDetails(movieId)
     }
 
     // Подписка на значения напрямую
-    val isLoading = viewModel.isLoading
-    val error = viewModel.error
-    val movie = viewModel.movieDetails
+    val movie = moviesViewModel.movieDetails
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            isLoading -> {
+            moviesViewModel.isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
-            error != null -> {
+            moviesViewModel.error != null -> {
                 Text(
-                    text = error,
+                    text = "Ошибка",
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.Center)

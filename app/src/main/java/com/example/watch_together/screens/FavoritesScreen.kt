@@ -1,5 +1,8 @@
 package com.example.watch_together.screens
 
+
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,11 +18,13 @@ import com.example.watch_together.viewModels.MoviesViewModel
 @Composable
 fun FavoritesScreen(
     navController: NavController,
-    viewModel: MoviesViewModel
+    moviesViewModel: MoviesViewModel
 ) {
     LaunchedEffect(Unit) {
-        viewModel.loadFavorites()
+        moviesViewModel.loadFavorites()
     }
+
+    val listState = moviesViewModel.favoritesListState
 
     Column(
         modifier = Modifier
@@ -30,10 +35,10 @@ fun FavoritesScreen(
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                viewModel.isLoading -> {
+                moviesViewModel.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                viewModel.favorites.isEmpty() -> {
+                moviesViewModel.favorites.isEmpty() -> {
                     Text(
                         text = "Список избранных фильмов пуст",
                         modifier = Modifier.align(Alignment.Center),
@@ -41,11 +46,20 @@ fun FavoritesScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(state = viewModel.saveListState) {
-                        items(viewModel.favorites, key = { it.id }) { movie ->
-                            MovieListItem(movie, viewModel, true) {
-                                navController.navigate("movie_details/${movie.id}")
-                            }
+                    LazyColumn(state = listState) {
+                        items(
+                            items = moviesViewModel.favorites,
+                            key = { it.id }
+                        ) { movie ->
+                            MovieListItem(
+                                movie = movie,
+                                favoritesViewModel = moviesViewModel,
+                                isFavorite = true,
+                                onClick = {
+                                    navController.navigate("movie_details/${movie.id}")
+                                },
+                                modifier = Modifier.animateItem(placementSpec = spring(stiffness = Spring.StiffnessMediumLow))
+                            )
                         }
                     }
                 }

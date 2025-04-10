@@ -21,6 +21,10 @@ class MovieRepository @Inject constructor(
         return apiService.searchMovies(query).results
     }
 
+    suspend fun getTopRatedMovies(): List<Movie> {
+        return apiService.getTopRatedMovies().results
+    }
+
     suspend fun getMovieById(movieId: Int): Movie {
         return apiService.getMovieById(movieId)
     }
@@ -41,6 +45,6 @@ class MovieRepository @Inject constructor(
             }.getOrNull()
         }
         emit(favoriteMovies)
-    }.flowOn(Dispatchers.IO) // 🔥 Переводим выполнение в фоновый поток
+    }.flowOn(Dispatchers.IO)
 
 }
