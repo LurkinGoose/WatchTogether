@@ -17,7 +17,7 @@
         android:theme="@style/Theme.App.Starting"
         tools:targetApi="tiramisu">
         <activity
-            android:theme="@style/Theme.App.Starting"
+            android:theme="@style/Theme.Watch_Together"
             android:name=".MainActivity"
             android:exported="true">
 

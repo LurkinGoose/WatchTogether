@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.watch_together.viewModels.MoviesViewModel
 
-
 @Composable
 fun DetailsScreen(
     movieId: Int,
@@ -27,28 +26,29 @@ fun DetailsScreen(
         moviesViewModel.getMovieDetails(movieId)
     }
 
-    // Подписка на значения напрямую
-    val movie = moviesViewModel.movieDetails
+    // Получаем состояние из ViewModel
+    val state by moviesViewModel.state.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            moviesViewModel.isLoading -> {
+            state.isLoading -> {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
-            moviesViewModel.error != null -> {
+            state.error != null -> {
                 Text(
-                    text = "Ошибка",
+                    text = "Ошибка: ${state.error}",
                     color = MaterialTheme.colorScheme.error,
                     fontSize = 18.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-            movie != null -> {
+            state.movieDetails != null -> {
+                val movie = state.movieDetails
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         Box {
                             AsyncImage(
-                                model = movie.fullPosterPath,
+                                model = movie?.fullPosterPath,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -73,7 +73,7 @@ fun DetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = movie.title,
+                            text = movie?.title ?: "Название не доступно",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(16.dp)
@@ -82,7 +82,7 @@ fun DetailsScreen(
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Text(
-                            text = movie.overview,
+                            text = movie?.overview ?: "Описание не доступно",
                             fontSize = 16.sp,
                             modifier = Modifier.padding(16.dp)
                         )

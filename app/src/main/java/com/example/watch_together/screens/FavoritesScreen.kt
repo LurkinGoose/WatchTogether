@@ -20,25 +20,29 @@ fun FavoritesScreen(
     navController: NavController,
     moviesViewModel: MoviesViewModel
 ) {
+    val state by moviesViewModel.state.collectAsState()
+
     LaunchedEffect(Unit) {
         moviesViewModel.loadFavorites()
     }
-
-    val listState = moviesViewModel.favoritesListState
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
     ) {
-        Text("Избранное", style = MaterialTheme.typography.headlineLarge, modifier = Modifier.padding(16.dp))
+        Text(
+            "Избранное",
+            style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.padding(16.dp)
+        )
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                moviesViewModel.isLoading -> {
+                state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                moviesViewModel.favorites.isEmpty() -> {
+                state.favorites.isEmpty() -> {
                     Text(
                         text = "Список избранных фильмов пуст",
                         modifier = Modifier.align(Alignment.Center),
@@ -46,9 +50,9 @@ fun FavoritesScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(state = listState) {
+                    LazyColumn(state = state.favoritesListState) {
                         items(
-                            items = moviesViewModel.favorites,
+                            items = state.favorites,
                             key = { it.id }
                         ) { movie ->
                             MovieListItem(
@@ -58,10 +62,25 @@ fun FavoritesScreen(
                                 onClick = {
                                     navController.navigate("movie_details/${movie.id}")
                                 },
-                                modifier = Modifier.animateItem(placementSpec = spring(stiffness = Spring.StiffnessMediumLow))
+                                modifier = Modifier.animateItem(
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                )
                             )
                         }
                     }
+                }
+            }
+
+            state.error?.let { error ->
+                Snackbar(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    action = {
+                        TextButton(onClick = { moviesViewModel.clearError() }) {
+                            Text("Ок")
+                        }
+                    }
+                ) {
+                    Text(error)
                 }
             }
         }

@@ -1,114 +1,101 @@
 package com.example.watch_together.viewModels
 
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.watch_together.models.Movie
 import com.example.watch_together.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class MoviesState(
+    val movies: List<Movie> = emptyList(),
+    val movieDetails: Movie? = null,
+    val favorites: List<Movie> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val searchListState: LazyListState = LazyListState(),
+    val favoritesListState: LazyListState = LazyListState()
+)
 
 @HiltViewModel
 class MoviesViewModel @Inject constructor(
     private val repository: MovieRepository
 ) : ViewModel() {
 
-    var movies by mutableStateOf<List<Movie>>(emptyList())
-        private set
-
-    var movieDetails by mutableStateOf<Movie?>(null)
-        private set
-
-    var favorites by mutableStateOf<List<Movie>>(emptyList())
-        private set
-
-    var isLoading by mutableStateOf(false)
-        private set
-
-    var error by mutableStateOf<String?>(null)
-        private set
-
-    // состояние скролла поиска
-    var searchListState: LazyListState = LazyListState()
-        private set
-
-    // состояние скролла избранного
-    var favoritesListState: LazyListState = LazyListState()
-        private set
+    private val _state = MutableStateFlow(MoviesState())
+    val state: StateFlow<MoviesState> = _state
 
     fun resetSearchScrollPosition() {
         viewModelScope.launch {
-            searchListState.scrollToItem(0)
+            _state.value.searchListState.scrollToItem(0)
         }
     }
 
     fun resetFavoritesScrollPosition() {
         viewModelScope.launch {
-            favoritesListState.scrollToItem(0)
+            _state.value.favoritesListState.scrollToItem(0)
         }
     }
 
     fun searchMovies(query: String) {
         resetSearchScrollPosition()
         viewModelScope.launch {
-            isLoading = true
-            error = null
+            _state.update { it.copy(isLoading = true, error = null) }
             try {
-                movies = repository.searchMovies(query)
+                val result = repository.searchMovies(query)
+                _state.update { it.copy(movies = result) }
             } catch (e: Exception) {
-                error = e.localizedMessage
+                _state.update { it.copy(error = e.localizedMessage) }
             } finally {
-                isLoading = false
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun loadTopRatedMovies() {
         viewModelScope.launch {
-            isLoading = true
-            error = null
+            _state.update { it.copy(isLoading = true, error = null) }
             try {
-                movies = repository.getTopRatedMovies()
+                val result = repository.getTopRatedMovies()
+                _state.update { it.copy(movies = result) }
             } catch (e: Exception) {
-                error = e.localizedMessage
+                _state.update { it.copy(error = e.localizedMessage) }
             } finally {
-                isLoading = false
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
 
-
     fun getMovieDetails(id: Int) {
         viewModelScope.launch {
-            isLoading = true
-            error = null
+            _state.update { it.copy(isLoading = true, error = null) }
             try {
-                movieDetails = repository.getMovieById(id)
+                val details = repository.getMovieById(id)
+                _state.update { it.copy(movieDetails = details) }
             } catch (e: Exception) {
-                error = e.localizedMessage
+                _state.update { it.copy(error = e.localizedMessage) }
             } finally {
-                isLoading = false
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
 
     fun loadFavorites() {
         viewModelScope.launch {
-            isLoading = true
+            _state.update { it.copy(isLoading = true) }
             try {
-                repository.getAllFavorites().collectLatest {
-                    favorites = it
+                repository.getAllFavorites().collect { result ->
+                    _state.update { it.copy(favorites = result) }
                 }
             } catch (e: Exception) {
-                error = e.localizedMessage
+                _state.update { it.copy(error = e.localizedMessage) }
             } finally {
-                isLoading = false
+                _state.update { it.copy(isLoading = false) }
             }
         }
     }
@@ -117,18 +104,22 @@ class MoviesViewModel @Inject constructor(
         viewModelScope.launch {
             repository.addToFavorites(movieId)
             val movie = repository.getMovieById(movieId)
-            favorites = favorites + movie
+            _state.update { it.copy(favorites = it.favorites + movie) }
         }
     }
 
     fun removeFromFavorites(movieId: Int) {
         viewModelScope.launch {
             repository.removeFromFavorites(movieId)
-            favorites = favorites.filterNot { it.id == movieId }
+            _state.update { it.copy(favorites = it.favorites.filterNot { movie -> movie.id == movieId }) }
         }
     }
 
     fun clearMovies() {
-        movies = emptyList()
+        _state.update { it.copy(movies = emptyList()) }
+    }
+
+    fun clearError() {
+        _state.update { it.copy(error = null) }
     }
 }

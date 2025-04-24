@@ -1,5 +1,6 @@
 package com.example.watch_together.screens
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,7 +9,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.watch_together.BuildConfig
 import com.example.watch_together.movieCards.MovieListItem
 import com.example.watch_together.viewModels.MoviesViewModel
 
@@ -19,16 +22,21 @@ fun SearchScreen(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
 
-    val listState = moviesViewModel.searchListState
+    val state by moviesViewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {
         moviesViewModel.loadFavorites()
         moviesViewModel.loadTopRatedMovies()
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .statusBarsPadding()) {
+    Log.d("TMDB_API_KEY", BuildConfig.TMDB_API_KEY)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .padding(16.dp)
+    ) {
 
         TextField(
             value = query,
@@ -36,6 +44,8 @@ fun SearchScreen(
             label = { Text("Введите название фильма") },
             modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = { moviesViewModel.searchMovies(query) },
@@ -46,10 +56,10 @@ fun SearchScreen(
 
         Box(modifier = Modifier.fillMaxSize()) {
             when {
-                moviesViewModel.isLoading -> {
+                state.isLoading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                moviesViewModel.movies.isEmpty() -> {
+                state.movies.isEmpty() -> {
                     Text(
                         text = "Нет результатов для поиска",
                         modifier = Modifier.align(Alignment.Center),
@@ -57,12 +67,12 @@ fun SearchScreen(
                     )
                 }
                 else -> {
-                    LazyColumn(state = listState) {
+                    LazyColumn(state = state.searchListState) {
                         items(
-                            moviesViewModel.movies,
+                            state.movies,
                             key = { it.id }
                         ) { movie ->
-                            val isFavorite = moviesViewModel.favorites.any { it.id == movie.id }
+                            val isFavorite = state.favorites.any { it.id == movie.id }
                             MovieListItem(
                                 movie = movie,
                                 favoritesViewModel = moviesViewModel,
@@ -73,6 +83,19 @@ fun SearchScreen(
                             )
                         }
                     }
+                }
+            }
+
+            state.error?.let { error ->
+                Snackbar(
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                    action = {
+                        TextButton(onClick = { moviesViewModel.clearError() }) {
+                            Text("Ок")
+                        }
+                    }
+                ) {
+                    Text(error)
                 }
             }
         }

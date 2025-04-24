@@ -1,5 +1,6 @@
 package com.example.watch_together.movieApiService
 
+import com.example.watch_together.BuildConfig
 import com.example.watch_together.models.Movie
 import com.example.watch_together.models.MovieList
 import retrofit2.Retrofit
@@ -8,7 +9,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 private const val BASE_URL = "https://api.themoviedb.org/3/"
-private const val API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjYTEwNzNhZGQ2YzQ3ZWFmZDE1MWFiODZjMjFjYTRiYiIsIm5iZiI6MTczOTM2MzIzMi4yNDQsInN1YiI6IjY3YWM5M2EwZGQ5YjdkMmVhYWIwY2Q0MyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.OaP36gO8NUw8__ZWzOpjqjifHlmiSN718JJjjIrl1Wo"
+private const val API_KEY = BuildConfig.TMDB_API_KEY
 
 interface MovieApiService {
 
@@ -16,7 +17,6 @@ interface MovieApiService {
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("query") query: String,
-        @Query("api_key") apiKey: String = API_KEY,
         @Query("language") language: String = "ru-RU"
         ): MovieList
 
@@ -24,7 +24,6 @@ interface MovieApiService {
     @GET("movie/{movie_id}")
     suspend fun getMovieById(
         @retrofit2.http.Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String = API_KEY,
         @Query("language") language: String = "ru-RU"
     ): Movie
 
