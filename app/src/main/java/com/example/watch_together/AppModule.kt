@@ -1,6 +1,7 @@
 package com.example.watch_together
 
 import android.content.Context
+import com.example.watch_together.auth.UserPreferences
 import com.example.watch_together.models.FavoriteMovieDao
 import com.example.watch_together.movieApiService.MovieApiService
 import com.example.watch_together.movieApiService.RetrofitInstance
@@ -32,4 +33,12 @@ object AppModule {
     fun provideFavoriteMovieDao(database: AppDatabase): FavoriteMovieDao {
         return database.favoriteMovieDao()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferences(context)
+    }
+
+
 }

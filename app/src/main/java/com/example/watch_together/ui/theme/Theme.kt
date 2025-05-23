@@ -15,8 +15,8 @@ private val LightColorScheme = lightColorScheme(
     primary = Color(0xFFE6B56F),
     onPrimary = Color.DarkGray,
 
-    background = Color.White,
-    surface = Color.LightGray,
+    background = Black,
+    surface = Black,
     onSurface = Color.DarkGray
 )
 
@@ -29,7 +29,7 @@ fun Watch_TogetherTheme(content: @Composable () -> Unit) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
         }
     }
 

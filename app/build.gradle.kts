@@ -80,6 +80,8 @@ dependencies {
     implementation("androidx.compose.animation:animation-graphics:1.7.8")
 
     implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-svg:2.5.0")
+
     implementation("androidx.core:core-splashscreen:1.0.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-metadata-jvm:0.9.0")
@@ -87,6 +89,8 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("com.google.dagger:hilt-android:2.55")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation("com.google.firebase:firebase-firestore-ktx:25.1.4")
+    implementation("androidx.wear.compose:compose-material:1.4.1")
     ksp("com.google.dagger:hilt-android-compiler:2.55")
 
     implementation("androidx.room:room-runtime:2.6.1")
@@ -99,6 +103,7 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
     implementation("com.google.firebase:firebase-database:20.3.1")
     implementation("com.google.firebase:firebase-auth:22.3.0")
+    implementation ("com.google.firebase:firebase-dynamic-links-ktx:21.1.0")
 
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")

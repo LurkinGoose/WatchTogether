@@ -1,10 +1,10 @@
-package com.example.watch_together.screens
+package com.example.watch_together.auth
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,19 +21,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.watch_together.R
-import com.example.watch_together.viewModels.AuthViewModel
 
 @Composable
-fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthSuccess: () -> Unit) {
+fun SignUpScreen(navController: NavController, authViewModel: AuthViewModel, onAuthSuccess: () -> Unit) {
     val context = LocalContext.current
-    val authState by viewModel.state.collectAsState()
+    val authState by authViewModel.uiState.collectAsState()
 
     LaunchedEffect(authState.user) {
         if (authState.user != null) {
@@ -41,7 +39,7 @@ fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthS
         }
     }
 
-    var name by rememberSaveable { mutableStateOf("") }
+    var fullName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isButtonClicked by remember { mutableStateOf(false) }
@@ -91,7 +89,7 @@ fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthS
                 modifier = Modifier.fillMaxWidth()
             ) {
 
-                if (authState.error != null && isButtonClicked && name.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+                if (authState.error != null && isButtonClicked && fullName.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
                     Text(
                         text = authState.error ?: "",
                         color = MaterialTheme.colorScheme.error,
@@ -101,11 +99,11 @@ fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthS
                 }
 
                 OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = fullName,
+                    onValueChange = { fullName = it },
                     label = { Text("Имя") },
                     modifier = Modifier.fillMaxWidth(),
-                    isError = isButtonClicked && name.isBlank(),
+                    isError = isButtonClicked && fullName.isBlank(),
                     shape = RoundedCornerShape(12.dp),
                     colors = TextFieldDefaults.colors(
                         unfocusedIndicatorColor = Color.LightGray,
@@ -163,8 +161,8 @@ fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthS
                 Button(
                     onClick = {
                         isButtonClicked = true
-                        if (name.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
-                            viewModel.signUpWithEmail(name.trim(), email.trim(), password)
+                        if (fullName.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+                            authViewModel.onIntent(AuthIntent.SignUpWithEmail(fullName.trim(), email.trim(), password))
                         }
                     },
                     modifier = Modifier
@@ -181,7 +179,7 @@ fun SignUpScreen(navController: NavController, viewModel: AuthViewModel, onAuthS
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
-                    onClick = { viewModel.signInWithGoogle(context) },
+                    onClick = { authViewModel.onIntent(AuthIntent.SignInWithGoogle(context)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),

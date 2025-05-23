@@ -5,15 +5,18 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FavoriteMovieDao {
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addFavorite(movie: FavoriteMovieEntity)
+    suspend fun addFavorite(entity: FavoriteMovieEntity)
 
     @Delete
-    suspend fun removeFavorite(movie: FavoriteMovieEntity)
+    suspend fun removeFavorite(entity: FavoriteMovieEntity)
 
     @Query("SELECT * FROM favorite_movies ORDER BY addedAt DESC")
-    suspend fun getAllFavorites(): List<FavoriteMovieEntity>
+    fun getAllFavorites(): Flow<List<FavoriteMovieEntity>>
 }
+
